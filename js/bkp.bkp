@@ -1,0 +1,228 @@
+const scratchCardContainer = document.getElementById("scratchCardContainer");
+const puzzleContainer = document.getElementById("puzzleContainer");
+const canvas = document.getElementById("scratchCanvas");
+const ctx = canvas.getContext("2d");
+
+function setupScratchCard() {
+  // Ensure the puzzle container is visible and the pieces are initialized
+  puzzleContainer.style.display = "block";
+  initializePuzzlePieces();
+
+  // Resize canvas to cover the viewport
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  // Create the scratchable overlay
+  ctx.fillStyle = "#CCCCCC"; // Scratch card color
+  ctx.fillRect(0, 0, canvas.width, canvas.height); // Draw overlay
+
+  // Add "Scratch to reveal" text
+  ctx.font = "bold 3rem Arial";
+  ctx.fillStyle = "#AAAAAA";
+  ctx.textAlign = "center";
+  ctx.fillText("Scratch here to reveal!", canvas.width / 2, canvas.height / 2);
+
+  let isScratching = false;
+  let lastMousePosition = null;
+
+  // Mouse event listeners
+  canvas.addEventListener("mousedown", (e) => {
+    isScratching = true;
+    lastMousePosition = { x: e.offsetX, y: e.offsetY };
+  });
+
+  canvas.addEventListener("mouseup", () => {
+    isScratching = false;
+    lastMousePosition = null;
+    checkScratchCompletion();
+  });
+
+  canvas.addEventListener("mousemove", (e) => {
+    if (isScratching) {
+      const currentMousePosition = { x: e.offsetX, y: e.offsetY };
+      if (lastMousePosition) {
+        scratchLine(lastMousePosition, currentMousePosition);
+      }
+      lastMousePosition = currentMousePosition;
+    }
+  });
+
+  // Touch event listeners for mobile devices
+  canvas.addEventListener("touchstart", (e) => {
+    isScratching = true;
+    const touch = e.touches[0];
+    lastMousePosition = { x: touch.clientX, y: touch.clientY };
+  });
+
+  canvas.addEventListener("touchmove", (e) => {
+    if (isScratching) {
+      const touch = e.touches[0];
+      const currentMousePosition = { x: touch.clientX, y: touch.clientY };
+      if (lastMousePosition) {
+        scratchLine(lastMousePosition, currentMousePosition);
+      }
+      lastMousePosition = currentMousePosition;
+    }
+  });
+
+  canvas.addEventListener("touchend", () => {
+    isScratching = false;
+    lastMousePosition = null;
+    checkScratchCompletion();
+  });
+
+  // Function to scratch a line
+  function scratchLine(start, end) {
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.strokeStyle = "rgba(0,0,0,1)";
+    ctx.lineWidth = 60; // Adjust the width for better scratching
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.stroke();
+  }
+
+  // Function to check if the scratch area is sufficiently revealed
+  function checkScratchCompletion() {
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    let transparentPixels = 0;
+
+    for (let i = 3; i < pixels.length; i += 4) {
+      if (pixels[i] === 0) {
+        transparentPixels++;
+      }
+    }
+
+    const transparency = transparentPixels / (pixels.length / 4);
+
+    if (transparency > 0.5) {
+      startPuzzle();
+    }
+  }
+}
+
+function initializePuzzlePieces() {
+  const kcat = createPuzzlePiece("./img/kcat.png");
+  const mcat = createPuzzlePiece("./img/mcat.png");
+
+  puzzleContainer.appendChild(kcat);
+  puzzleContainer.appendChild(mcat);
+
+  const dropZone = createDropZone();
+  puzzleContainer.appendChild(dropZone);
+
+  let placedPieces = 0;
+
+  [kcat, mcat].forEach((piece) => {
+    piece.addEventListener("mouseup", () => {
+      if (isInsideDropZone(piece, dropZone)) {
+        piece.style.position = "relative";
+        piece.style.top = "0";
+        piece.style.left = "0";
+        piece.style.transform = "translate(-50%, -50%)";
+        dropZone.appendChild(piece);
+        placedPieces++;
+        if (placedPieces === 2) triggerLoveLetter();
+      }
+    });
+  });
+}
+
+function startPuzzle() {
+  // Hide the scratch card overlay with a fade-out effect
+  scratchCardContainer.style.transition = "opacity 0.5s";
+  scratchCardContainer.style.opacity = "0";
+  setTimeout(() => {
+    scratchCardContainer.style.display = "none";
+  }, 500); // Matches the transition duration
+
+  // Enable interactions with the puzzle pieces
+  puzzleContainer.style.pointerEvents = "auto";
+}
+
+function createPuzzlePiece(src) {
+  const img = document.createElement("img");
+  img.src = src;
+  img.classList.add("puzzleImage");
+  img.style.top = Math.random() * (window.innerHeight - 200) + "px";
+  img.style.left = Math.random() * (window.innerWidth - 200) + "px";
+  makeDraggable(img);
+  return img;
+}
+
+function createDropZone() {
+  const div = document.createElement("div");
+  div.id = "dropZone";
+  div.style.width = "400px";
+  div.style.height = "400px";
+  div.style.position = "absolute";
+  div.style.top = "50%";
+  div.style.left = "50%";
+  div.style.border = "2px dashed #ff3d68";
+  div.style.transform = "translate(-50%, -50%)";
+  return div;
+}
+
+function isInsideDropZone(piece, zone) {
+  const pieceRect = piece.getBoundingClientRect();
+  const zoneRect = zone.getBoundingClientRect();
+  return (
+    pieceRect.left >= zoneRect.left &&
+    pieceRect.right <= zoneRect.right &&
+    pieceRect.top >= zoneRect.top &&
+    pieceRect.bottom <= zoneRect.bottom
+  );
+}
+
+function makeDraggable(element) {
+  let offsetX, offsetY;
+  element.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+
+    const onMouseMove = (e) => {
+      element.style.left = e.pageX - offsetX + "px";
+      element.style.top = e.pageY - offsetY + "px";
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+
+    document.addEventListener(
+      "mouseup",
+      () => {
+        document.removeEventListener("mousemove", onMouseMove);
+      },
+      { once: true }
+    );
+  });
+
+  // Touch events for mobile devices
+  element.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    offsetX = touch.clientX - element.getBoundingClientRect().left;
+    offsetY = touch.clientY - element.getBoundingClientRect().top;
+
+    const onTouchMove = (e) => {
+      const touch = e.touches[0];
+      element.style.left = touch.clientX - offsetX + "px";
+      element.style.top = touch.clientY - offsetY + "px";
+    };
+
+    document.addEventListener("touchmove", onTouchMove);
+
+    document.addEventListener(
+      "touchend",
+      () => {
+        document.removeEventListener("touchmove", onTouchMove);
+      },
+      { once: true }
+    );
+  });
+}
+
+// Call setupScratchCard after defining all functions
+//setupScratchCard();

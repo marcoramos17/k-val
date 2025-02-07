@@ -1,0 +1,184 @@
+const scoreThreshold = 10; // Number of hearts needed
+let score = 0;
+let heartsInterval; // Will hold the interval ID
+
+// DOM elements
+const gameContainer = document.getElementById("gameContainer");
+const scoreDisplay = document.getElementById("score");
+const scratchCardContainer = document.getElementById("scratchCardContainer");
+const puzzleContainer = document.getElementById("puzzleContainer");
+const loveLetterContainer = document.getElementById("loveLetterContainer");
+
+// Scratch card setup
+const canvas = document.createElement("canvas");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+canvas.style.position = "absolute";
+canvas.style.top = "0";
+canvas.style.left = "0";
+scratchCardContainer.appendChild(canvas);
+const ctx = canvas.getContext("2d");
+
+function setupScratchCard() {
+  // Fill the canvas with a solid color
+  ctx.fillStyle = "#CCCCCC";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Display scratch instruction text
+  ctx.font = "bold 3rem Arial";
+  ctx.fillStyle = "#AAAAAA";
+  ctx.textAlign = "center";
+  ctx.fillText("Scratch here to reveal!", canvas.width / 2, canvas.height / 2);
+
+  let isScratching = false;
+  canvas.addEventListener("mousedown", () => (isScratching = true));
+  canvas.addEventListener("mouseup", () => (isScratching = false));
+  canvas.addEventListener("mousemove", (e) => {
+    if (isScratching) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      ctx.clearRect(x - 20, y - 20, 40, 40);
+    }
+  });
+
+  canvas.addEventListener("mousemove", () => {
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let clearedPixels = 0;
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      if (imageData.data[i + 3] === 0) clearedPixels++;
+    }
+    const clearedPercentage = (clearedPixels / (canvas.width * canvas.height)) * 100;
+    if (clearedPercentage > 50) {
+      canvas.remove();
+      startPuzzlePhase();
+    }
+  });
+}
+
+// Puzzle setup with the two draggable images from your img folder
+function startPuzzlePhase() {
+  scratchCardContainer.style.display = "none";
+  puzzleContainer.style.display = "flex";
+
+  // Create left image (kcat)
+  const image1 = document.createElement("img");
+  image1.src = "./img/kcat.png"; // Ensure the file path and extension are correct
+  image1.classList.add("puzzleImage");
+  image1.style.position = "absolute";
+  image1.style.top = Math.random() * (window.innerHeight - 100) + "px";
+  image1.style.left = Math.random() * (window.innerWidth - 100) + "px";
+
+  // Create right image (mcat)
+  const image2 = document.createElement("img");
+  image2.src = "./img/mcat.png"; // Ensure the file path and extension are correct
+  image2.classList.add("puzzleImage");
+  image2.style.position = "absolute";
+  image2.style.top = Math.random() * (window.innerHeight - 100) + "px";
+  image2.style.left = Math.random() * (window.innerWidth - 100) + "px";
+
+  puzzleContainer.appendChild(image1);
+  puzzleContainer.appendChild(image2);
+
+  makeDraggable(image1);
+  makeDraggable(image2);
+
+  // Create a drop zone in the center of the screen
+  const dropZone = document.createElement("div");
+  dropZone.id = "dropZone";
+  dropZone.style.position = "absolute";
+  dropZone.style.top = "50%";
+  dropZone.style.left = "50%";
+  dropZone.style.width = "200px";
+  dropZone.style.height = "200px";
+  dropZone.style.transform = "translate(-50%, -50%)";
+  dropZone.style.border = "2px dashed #ff3d68";
+  puzzleContainer.appendChild(dropZone);
+
+  // Check if both images are in the drop zone
+  function checkImages() {
+    const rect1 = image1.getBoundingClientRect();
+    const rect2 = image2.getBoundingClientRect();
+    const dropRect = dropZone.getBoundingClientRect();
+
+    if (
+      rect1.left > dropRect.left &&
+      rect1.right < dropRect.right &&
+      rect1.top > dropRect.top &&
+      rect1.bottom < dropRect.bottom &&
+      rect2.left > dropRect.left &&
+      rect2.right < dropRect.right &&
+      rect2.top > dropRect.top &&
+      rect2.bottom < dropRect.bottom
+    ) {
+      triggerLoveLetter();
+    }
+  }
+
+  image1.addEventListener("mouseup", checkImages);
+  image2.addEventListener("mouseup", checkImages);
+}
+
+
+// Make elements draggable
+function makeDraggable(element) {
+  let offsetX = 0,
+    offsetY = 0;
+  element.addEventListener("mousedown", (e) => {
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+    const onMouseMove = (e) => {
+      element.style.left = e.pageX - offsetX + "px";
+      element.style.top = e.pageY - offsetY + "px";
+    };
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener(
+      "mouseup",
+      () => {
+        document.removeEventListener("mousemove", onMouseMove);
+      },
+      { once: true }
+    );
+  });
+}
+
+// Reveal the love letter
+function triggerLoveLetter() {
+  puzzleContainer.style.display = "none";
+  loveLetterContainer.style.display = "flex";
+}
+
+// Trigger the scratch card
+function triggerScratchCard() {
+  // Stop generating new hearts
+  clearInterval(heartsInterval);
+  gameContainer.style.display = "none";
+  scratchCardContainer.style.display = "flex";
+  setupScratchCard();
+}
+
+// Start the hearts animation
+function startHearts() {
+  heartsInterval = setInterval(() => {
+    const heart = document.createElement("div");
+    heart.classList.add("heart");
+    heart.textContent = "❤️";
+    heart.style.left = Math.random() * 100 + "vw";
+    heart.style.top = "-10vh";
+    heart.style.fontSize = Math.random() * 1.5 + 1.5 + "rem";
+
+    heart.addEventListener("click", () => {
+      score++;
+      scoreDisplay.textContent = `Score: ${score}`;
+      heart.remove();
+      if (score >= scoreThreshold) {
+        triggerScratchCard();
+      }
+    });
+    heart.addEventListener("animationend", () => heart.remove());
+    gameContainer.appendChild(heart);
+  }, 800);
+}
+
+// Initialize the hearts animation
+startHearts();
