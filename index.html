@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Will You Be My Valentine?</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Floating Hearts Game Container -->
+  <div id="gameContainer">
+    <div id="score">Score: 0</div>
+    <!-- Hearts will be dynamically added here -->
+  </div>
+
+  <!-- Scratch Card Container (Initially Hidden) -->
+  <div id="scratchCardContainer" class="hidden">
+    <div id="hiddenMessage">Will You Be My Valentine?</div>
+    <canvas id="scratchCanvas"></canvas>
+  </div>
+
+  <div id="puzzleContainer" style="display: none;"></div>
+  <div id="loveLetterContainer" style="display: none;">
+    <div class="loveLetter">
+      <p>Will you be my Valentine?</p>
+      <button>Yes</button>
+      <button>No</button>
+    </div>
+  </div>
+
+
+  <script src="script.js"></script>
+</body>
+</html>
