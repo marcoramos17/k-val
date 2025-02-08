@@ -282,4 +282,3 @@
 .letter-content button:hover {
   background-color: #e6325c;
 }
-
