@@ -29,13 +29,9 @@ function startHearts() {
   }, 800);
 }
 
-// Stop hearts and transition to the scratch card
+// Start the scratch card game
 function triggerScratchCard() {
   scoreDisplay.textContent = "";
-  //clearInterval(heartsInterval);
-  //gameContainer.style.display = "none";
-  //document.getElementById("scratchCardContainer").style.display = "flex";
-  // At the appropriate point in your script, perhaps after a certain event
   setupScratchOverlay();
   startPuzzle();
 }

@@ -176,7 +176,7 @@ function checkPlacement(piece) {
 
     if (placedPieces === 2) {
       setTimeout(() => {
-        alert('Congratulations!');
+        triggerLoveLetter();
       }, 100);
     }
   }
