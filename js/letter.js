@@ -76,47 +76,100 @@ function init3DEnvelope() {
   animate();
 }
 
-// Create the 3D envelope with triangular flap
+// Create the 3D envelope with correctly oriented flap
 function createEnvelope() {
   // Create materials
   const envelopeMaterial = new THREE.MeshPhongMaterial({ color: 0xfdf5e6 });
-  const flapMaterial = new THREE.MeshPhongMaterial({ color: 0xf5deb3 });
-  const sealMaterial = new THREE.MeshPhongMaterial({ color: 0xff3d68 });
+  const flapMaterial = new THREE.MeshPhongMaterial({
+    color: 0xf5deb3,
+    side: THREE.DoubleSide,
+  });
+  const sealMaterial = new THREE.MeshPhongMaterial({
+    color: 0xff3d68,
+    side: THREE.DoubleSide,
+  });
 
   // Create the envelope body (thinner)
-  const envelopeBodyGeometry = new THREE.BoxGeometry(2, 1.2, 0.02);
+  const envelopeBodyGeometry = new THREE.BoxGeometry(2, 1, 0.02);
   const envelopeBody = new THREE.Mesh(envelopeBodyGeometry, envelopeMaterial);
   scene.add(envelopeBody);
 
+  // Add outline to envelope body
+  const envelopeEdges = new THREE.EdgesGeometry(envelopeBodyGeometry);
+  const envelopeOutline = new THREE.LineSegments(
+    envelopeEdges,
+    new THREE.LineBasicMaterial({ color: 0x000000 })
+  );
+  envelopeBody.add(envelopeOutline);
+
+  // Adjust envelope body position if needed
+  envelopeBody.position.y = -0.5; // Align bottom edge to y= -1
+
   // Create the triangular flap using ShapeGeometry
   const flapShape = new THREE.Shape();
-  flapShape.moveTo(-1, 0);
-  flapShape.lineTo(1, 0);
-  flapShape.lineTo(0, 0.8);
-  flapShape.lineTo(-1, 0);
+  flapShape.moveTo(-1, 0);    // Bottom left corner
+  flapShape.lineTo(1, 0);     // Bottom right corner
+  flapShape.lineTo(0, 1);     // Top center point
+  flapShape.lineTo(-1, 0);    // Close the shape
 
   const flapGeometry = new THREE.ShapeGeometry(flapShape);
+  flapGeometry.translate(0, -0.5, 0); // Move pivot to bottom edge
+
   const flap = new THREE.Mesh(flapGeometry, flapMaterial);
 
   // Position the flap
-  flap.rotation.x = -Math.PI / 2;
-  flap.position.z = 0.01;
-  flap.position.y = 0.6;
+  flap.position.y = 0.0;     // Align with the top edge of the envelope body
+  flap.position.z = 0.01;    // Slightly in front of the envelope body
+  flap.rotation.x = 0;       // Ensure the flap is closed at the start
+
   scene.add(flap);
 
-  // Create the seal
+  // Add outline to flap
+  const flapEdges = new THREE.EdgesGeometry(flapGeometry);
+  const flapOutline = new THREE.LineSegments(
+    flapEdges,
+    new THREE.LineBasicMaterial({ color: 0x000000 })
+  );
+  flap.add(flapOutline);
+
+  // Create the seal and attach it to the tip of the flap
   const sealGeometry = new THREE.CircleGeometry(0.1, 32);
   const seal = new THREE.Mesh(sealGeometry, sealMaterial);
-  seal.position.set(0, 0.3, 0.011);
+
+  // Calculate flap tip position
+  const flapTipY = flap.position.y + 0.5; // Since the flap's local y ranges from -0.5 to 0.5
+
+  seal.position.set(0, flapTipY, 0.011); // Slightly in front of the flap
   scene.add(seal);
+
+  // Add outline to seal
+  const sealEdges = new THREE.EdgesGeometry(sealGeometry);
+  const sealOutline = new THREE.LineSegments(
+    sealEdges,
+    new THREE.LineBasicMaterial({ color: 0x000000 })
+  );
+  seal.add(sealOutline);
 
   // Create the letter as a thin plane
   const letterGeometry = new THREE.PlaneGeometry(1.8, 1.0);
-  const letterMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+  const letterMaterial = new THREE.MeshPhongMaterial({
+    color: 0xffffff,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0,
+  });
   const letter = new THREE.Mesh(letterGeometry, letterMaterial);
-  letter.position.z = -0.005;
-  letter.position.y = 0;
+  letter.position.z = -0.005; // Slightly behind the envelope body
+  letter.position.y = -0.5;   // Start inside the envelope
   scene.add(letter);
+
+  // Add outline to letter
+  const letterEdges = new THREE.EdgesGeometry(letterGeometry);
+  const letterOutline = new THREE.LineSegments(
+    letterEdges,
+    new THREE.LineBasicMaterial({ color: 0x000000 })
+  );
+  letter.add(letterOutline);
 
   // Add lighting
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -140,7 +193,6 @@ function onWindowResize() {
 // Mouse controls for rotating the envelope
 function enableMouseControls() {
   let isMouseDown = false;
-  const previousMousePosition = { x: 0, y: 0 };
 
   renderer.domElement.addEventListener('mousedown', () => {
     isMouseDown = true;
@@ -209,10 +261,10 @@ function onDocumentMouseClick(event) {
   }
 
   const intersects = raycaster.intersectObjects(objects);
-
+  
   if (intersects.length > 0) {
     const intersectedObject = intersects[0].object;
-
+  
     if (intersectedObject === envelopeObjects.seal && !isEnvelopeOpened) {
       // Open the envelope
       openEnvelope();
@@ -227,10 +279,10 @@ function onDocumentMouseClick(event) {
 function openEnvelope() {
   isEnvelopeOpened = true;
 
-  // Animate the flap opening
+  // Animate the flap opening around the X-axis
   const flap = envelopeObjects.flap;
   gsap.to(flap.rotation, {
-    z: Math.PI / 2,
+    x: -Math.PI / 2,
     duration: 1,
     onComplete: () => {
       // After the flap opens, slide out the letter
@@ -246,13 +298,20 @@ function openEnvelope() {
 function slideOutLetter() {
   const letter = envelopeObjects.letter;
 
+  // Animate the letter sliding up
   gsap.to(letter.position, {
-    y: 1.5, // Adjust as needed
+    y: 0.5, // Move the letter upward
     duration: 1,
     onComplete: () => {
       // Display the letter content
       showLetterContent();
     },
+  });
+
+  // Fade in the letter
+  gsap.to(letter.material, {
+    opacity: 1,
+    duration: 1,
   });
 }
 
@@ -271,7 +330,7 @@ function showLetterContent() {
   context.fillRect(0, 0, canvas.width, canvas.height);
 
   context.fillStyle = '#000000';
-  context.font = '28px Great Vibes, cursive';
+  context.font = '32px Great Vibes, cursive';
   context.textAlign = 'center';
 
   const message = `
@@ -284,7 +343,7 @@ function showLetterContent() {
 
   // Split the message into lines
   const lines = message.trim().split('\n');
-  let y = 80;
+  let y = 100;
   const lineHeight = 40;
   for (const line of lines) {
     context.fillText(line.trim(), canvas.width / 2, y);
