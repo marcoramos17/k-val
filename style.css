@@ -225,31 +225,32 @@
   z-index: 3;
 }
 
+/* Letter */
 .letter {
   position: absolute;
-  top: 100%; /* Start just below the envelope */
+  bottom: -100%; /* Start with the letter hidden below the envelope */
   left: 50%;
-  width: 280px; /* Set desired width */
-  height: auto; /* Adjust height based on content */
+  width: 280px;
+  height: auto; /* Adjusts based on content */
   background-color: #fff;
   border: 2px solid #ccc;
   box-sizing: border-box;
   overflow: hidden;
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(-50%) translateY(200%);
   transition: transform 1s ease;
   z-index: 1;
-  /* Optional: Add a background image for an old letter look */
-  /* Uncomment and set the correct path if using an image */
+  /* Optional background image */
   /* background-image: url('img/old-paper.jpg'); */
   /* background-size: cover; */
   /* background-repeat: no-repeat; */
   /* background-position: center; */
-  /* background-position: center; */
 }
 
+/* Letter appears by sliding up */
 .letter.open {
-  transform: translateX(-50%) translateY(-100%); /* Move up to reveal */
+  transform: translateX(-50%) translateY(10%); /* Move up into view */
 }
+
 
 .letter-content {
   padding: 20px;
