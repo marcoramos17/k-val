@@ -64,7 +64,8 @@ function triggerLoveLetter() {
     letterContent.appendChild(noButton);
     letter.appendChild(letterContent);
     loveLetterContainer.appendChild(letter);
-  
+    envelope.appendChild(letter);
+
     // Add event listeners
     seal.addEventListener("click", openEnvelope);
     yesButton.addEventListener("click", () => {

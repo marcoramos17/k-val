@@ -163,9 +163,11 @@
 
 .envelope {
   position: relative;
-  width: 300px;
+  width: 300px; /* Match envelope width */
   height: 200px;
   perspective: 1000px;
+  /* Add bottom margin to make space for the letter */
+  margin-bottom: 150px; /* Adjust as needed */
 }
 
 .envelope-front {
@@ -187,7 +189,7 @@
   transform-origin: bottom;
   transition: transform 1s ease;
   backface-visibility: hidden;
-  z-index: 2;
+  z-index: 3;
 }
 
 .envelope-flap.open {
@@ -225,25 +227,36 @@
 
 .letter {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 0;
+  top: 100%; /* Start just below the envelope */
+  left: 50%;
+  width: 280px; /* Set desired width */
+  height: auto; /* Adjust height based on content */
   background-color: #fff;
   border: 2px solid #ccc;
   box-sizing: border-box;
   overflow: hidden;
-  transition: height 1s ease;
+  transform: translateX(-50%) translateY(0);
+  transition: transform 1s ease;
   z-index: 1;
+  /* Optional: Add a background image for an old letter look */
+  /* Uncomment and set the correct path if using an image */
+  /* background-image: url('img/old-paper.jpg'); */
+  /* background-size: cover; */
+  /* background-repeat: no-repeat; */
+  /* background-position: center; */
+  /* background-position: center; */
 }
 
 .letter.open {
-  height: 100%;
+  transform: translateX(-50%) translateY(-100%); /* Move up to reveal */
 }
 
 .letter-content {
   padding: 20px;
   text-align: center;
+  font-family: 'Georgia', serif;
+  color: #333;
+  line-height: 1.5;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
@@ -256,7 +269,7 @@
 }
 
 .letter-content button {
-  margin: 0 10px;
+  margin: 5px;
   padding: 10px 20px;
   background-color: #ff3d68;
   color: #fff;
