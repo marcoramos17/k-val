@@ -1,116 +1,154 @@
 // scratch.js
 
-const scratchCardContainer = document.getElementById("scratchCardContainer");
-const canvas = document.getElementById("scratchCanvas");
-const ctx = canvas.getContext("2d");
-
-// Set initial display to none
-scratchCardContainer.style.display = "none";
-
-function setupScratchCard() {
-    // Initialize the puzzle pieces
-    initializePuzzle(); // Call the function from puzzle.js
+function setupScratchOverlay() {
+    // Create the canvas element
+    const scratchCanvas = document.createElement('canvas');
+    scratchCanvas.id = 'scratchCanvas';
   
-    // Show the scratch card container
-    scratchCardContainer.style.display = "flex";
+    // Set canvas dimensions to full viewport
+    scratchCanvas.width = window.innerWidth;
+    scratchCanvas.height = window.innerHeight;
   
-    // Resize canvas to cover the viewport
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // Style the canvas to position it absolutely over the hearts game
+    scratchCanvas.style.position = 'fixed';
+    scratchCanvas.style.top = '0';
+    scratchCanvas.style.left = '0';
+    scratchCanvas.style.width = '100vw';
+    scratchCanvas.style.height = '100vh';
+    scratchCanvas.style.zIndex = '9999'; // Ensure it's on top
+    scratchCanvas.style.cursor = 'crosshair';
   
-    // Create the scratchable overlay
-    ctx.fillStyle = "#CCCCCC"; // Scratch card color
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Append the canvas to the body
+    document.body.appendChild(scratchCanvas);
   
-    // Add "Scratch to reveal" text
-    ctx.font = "bold 3rem Arial";
-    ctx.fillStyle = "#AAAAAA";
-    ctx.textAlign = "center";
-    ctx.fillText("Scratch here to reveal!", canvas.width / 2, canvas.height / 2);
+    // Get the drawing context
+    const ctx = scratchCanvas.getContext('2d');
   
-    // Initialize scratch events
-    setupScratchEvents();
-  }
-  
-  function setupScratchEvents() {
+    // Variables for scratching
     let isScratching = false;
-    let lastMousePosition = null;
+    let lastPoint = null;
   
-    // Mouse event listeners
-    canvas.addEventListener("mousedown", (e) => {
-      isScratching = true;
-      lastMousePosition = { x: e.offsetX, y: e.offsetY };
+    // Draw the scratchable overlay
+    function drawOverlay() {
+      ctx.fillStyle = '#B0B0B0'; // Gray overlay color
+      ctx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+  
+      // Add text if desired
+      ctx.font = 'bold 48px Arial';
+      ctx.fillStyle = '#888';
+      ctx.textAlign = 'center';
+      ctx.fillText('Scratch here!', scratchCanvas.width / 2, scratchCanvas.height / 2);
+  
+      // Set composite operation for scratching
+      ctx.globalCompositeOperation = 'destination-out';
+    }
+  
+    // Initialize the overlay
+    drawOverlay();
+  
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      // Update canvas dimensions
+      scratchCanvas.width = window.innerWidth;
+      scratchCanvas.height = window.innerHeight;
+  
+      // Redraw the overlay
+      drawOverlay();
     });
   
-    canvas.addEventListener("mouseup", () => {
-      isScratching = false;
-      lastMousePosition = null;
-      checkScratchCompletion();
-    });
+    // Event handlers for scratching
   
-    canvas.addEventListener("mousemove", (e) => {
-      if (isScratching) {
-        const currentMousePosition = { x: e.offsetX, y: e.offsetY };
-        if (lastMousePosition) {
-          scratchLine(lastMousePosition, currentMousePosition);
-        }
-        lastMousePosition = currentMousePosition;
+    // Get the position within the canvas
+    function getPosition(e) {
+      const rect = scratchCanvas.getBoundingClientRect();
+      let x, y;
+      if (e.touches) {
+        x = e.touches[0].clientX - rect.left;
+        y = e.touches[0].clientY - rect.top;
+      } else {
+        x = e.clientX - rect.left;
+        y = e.clientY - rect.top;
       }
-    });
+      return { x, y };
+    }
+  
+    // Start scratching
+    function startScratch(e) {
+      e.preventDefault();
+      isScratching = true;
+      lastPoint = getPosition(e);
+      scratchLine(lastPoint.x, lastPoint.y, true);
+    }
+  
+    // Continue scratching
+    function moveScratch(e) {
+      if (!isScratching) return;
+      e.preventDefault();
+      const currentPoint = getPosition(e);
+      scratchLine(currentPoint.x, currentPoint.y, false);
+      lastPoint = currentPoint;
+    }
+  
+    // Stop scratching
+    function endScratch(e) {
+      isScratching = false;
+      checkScratchCompletion();
+    }
+  
+    // Draw the scratch line
+    function scratchLine(x, y, fresh) {
+      ctx.lineWidth = 50; // Adjust the scratch line width as desired
+      ctx.lineCap = 'round';
+  
+      if (fresh) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+    }
+  
+    // Check how much has been scratched
+    function checkScratchCompletion() {
+      const imageData = ctx.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height);
+      const pixels = imageData.data;
+      let transparentPixels = 0;
+  
+      // Count transparent pixels
+      for (let i = 3; i < pixels.length; i += 4) {
+        if (pixels[i] === 0) {
+          transparentPixels++;
+        }
+      }
+  
+      const totalPixels = pixels.length / 4;
+      const percentage = (transparentPixels / totalPixels) * 100;
+  
+      if (percentage > 70) {
+        // Remove the overlay when threshold is reached
+        scratchCanvas.style.transition = 'opacity 0.5s';
+        scratchCanvas.style.opacity = '0';
+        setTimeout(() => {
+          scratchCanvas.parentNode.removeChild(scratchCanvas);
+        }, 500);
+      }
+    }
+  
+    // Add event listeners
+    scratchCanvas.addEventListener('mousedown', startScratch);
+    scratchCanvas.addEventListener('mousemove', moveScratch);
+    scratchCanvas.addEventListener('mouseup', endScratch);
+    scratchCanvas.addEventListener('mouseleave', endScratch);
   
     // Touch events for mobile devices
-    canvas.addEventListener("touchstart", (e) => {
-      isScratching = true;
-      const touch = e.touches[0];
-      lastMousePosition = { x: touch.clientX - canvas.offsetLeft, y: touch.clientY - canvas.offsetTop };
-    });
-  
-    canvas.addEventListener("touchmove", (e) => {
-      if (isScratching) {
-        const touch = e.touches[0];
-        const currentMousePosition = { x: touch.clientX - canvas.offsetLeft, y: touch.clientY - canvas.offsetTop };
-        if (lastMousePosition) {
-          scratchLine(lastMousePosition, currentMousePosition);
-        }
-        lastMousePosition = currentMousePosition;
-      }
-    });
-  
-    canvas.addEventListener("touchend", () => {
-      isScratching = false;
-      lastMousePosition = null;
-      checkScratchCompletion();
-    });
+    scratchCanvas.addEventListener('touchstart', startScratch);
+    scratchCanvas.addEventListener('touchmove', moveScratch);
+    scratchCanvas.addEventListener('touchend', endScratch);
+    scratchCanvas.addEventListener('touchcancel', endScratch);
   }
   
-  function scratchLine(start, end) {
-    ctx.globalCompositeOperation = "destination-out"; // Erase overlay
-    ctx.lineWidth = 40; // Width of the "scratch"
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(start.x, start.y);
-    ctx.lineTo(end.x, end.y);
-    ctx.stroke();
-  }
+  // Expose the function globally
+  window.setupScratchOverlay = setupScratchOverlay;
+  
 
-  function checkScratchCompletion() {
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const totalPixels = imageData.data.length / 4;
-    let revealedPixels = 0;
-  
-    // Count transparent pixels
-    for (let i = 3; i < imageData.data.length; i += 4) {
-      if (imageData.data[i] === 0) {
-        revealedPixels++;
-      }
-    }
-  
-    if (revealedPixels / totalPixels > 0.5) {
-      // Remove the scratch card
-      scratchCardContainer.style.display = "none";
-  
-      // Enable interactions with the puzzle
-      puzzleContainer.style.pointerEvents = "auto";
-    }
-  }
-  

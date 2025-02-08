@@ -31,10 +31,13 @@ function startHearts() {
 
 // Stop hearts and transition to the scratch card
 function triggerScratchCard() {
-  clearInterval(heartsInterval);
-  gameContainer.style.display = "none";
-  document.getElementById("scratchCardContainer").style.display = "flex";
-  setupScratchCard(); // Defined in scratchPuzzle.js
+  scoreDisplay.textContent = "";
+  //clearInterval(heartsInterval);
+  //gameContainer.style.display = "none";
+  //document.getElementById("scratchCardContainer").style.display = "flex";
+  // At the appropriate point in your script, perhaps after a certain event
+  setupScratchOverlay();
+  startPuzzle();
 }
 
 startHearts();

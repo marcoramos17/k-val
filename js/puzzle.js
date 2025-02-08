@@ -1,75 +1,104 @@
 // puzzle.js
 
-// Get the puzzle container
 const puzzleContainer = document.getElementById('puzzleContainer');
-
-// Define ideal positions for the images (you can adjust these values)
-const idealPositions = {
-  kcat: { x: window.innerWidth / 2 - 0, y: window.innerHeight / 2 - 100 },
-  mcat: { x: window.innerWidth / 2 + 0, y: window.innerHeight / 2 - 100 },
-};
-
-// Variable to track the number of correctly placed pieces
+const canvases = {}; // To store the off-screen canvases
 let placedPieces = 0;
 
-// Function to start the puzzle
 function startPuzzle() {
-  // Ensure the puzzle container is visible
   puzzleContainer.style.display = 'block';
-
-  // Clear any existing content in the puzzle container
   puzzleContainer.innerHTML = '';
 
-  // Create and set up the puzzle pieces
   const kcat = createPuzzlePiece('./img/kcat.png', 'kcat');
   const mcat = createPuzzlePiece('./img/mcat.png', 'mcat');
 
-  // Append the puzzle pieces to the container
+  let imagesLoaded = 0;
+
+  [kcat, mcat].forEach((piece) => {
+    piece.onload = () => {
+      createCanvasForImage(piece, piece.id);
+      imagesLoaded++;
+      if (imagesLoaded === 2) {
+        randomizePositions([kcat, mcat]);
+        makeDraggable(kcat);
+        makeDraggable(mcat);
+      }
+    };
+  });
+
   puzzleContainer.appendChild(kcat);
   puzzleContainer.appendChild(mcat);
-
-  // Randomly position the pieces on the screen
-  randomizePositions([kcat, mcat]);
-
-  // Make the pieces draggable
-  makeDraggable(kcat);
-  makeDraggable(mcat);
 }
 
-// Create a puzzle piece element
 function createPuzzlePiece(src, id) {
-  const img = document.createElement('img');
-  img.src = src;
-  img.id = id;
-  img.classList.add('puzzleImage'); // Assuming this class exists in your CSS
-  img.style.position = 'absolute';
-  img.style.cursor = 'grab';
-  img.dataset.placed = 'false'; // Custom attribute to track placement
-  return img;
+    const img = document.createElement('img');
+    img.src = src;
+    img.id = id;
+    img.classList.add('puzzleImage');
+    img.style.position = 'absolute';
+    img.style.cursor = 'grab';
+    img.dataset.placed = 'false';
+    img.setAttribute('draggable', 'false'); // Disable default dragging
+
+    // Set the desired width and height
+    img.style.width = '80px'; // Adjust to your desired size
+    img.style.height = 'auto'; // Maintain aspect ratio
+    return img;
+  }
+  
+
+function createCanvasForImage(imageElement, id) {
+  const canvas = document.createElement('canvas');
+  canvas.width = imageElement.naturalWidth;
+  canvas.height = imageElement.naturalHeight;
+
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(imageElement, 0, 0);
+
+  canvases[id] = canvas;
 }
 
-// Randomly position the puzzle pieces within the viewport
 function randomizePositions(pieces) {
+  const maxX = window.innerWidth - 200;
+  const maxY = window.innerHeight - 200;
   pieces.forEach((piece) => {
-    const maxX = window.innerWidth - 200; // Assuming image width is less than 200px
-    const maxY = window.innerHeight - 200; // Assuming image height is less than 200px
     piece.style.left = Math.random() * maxX + 'px';
     piece.style.top = Math.random() * maxY + 'px';
   });
 }
 
-// Make an element draggable
+function isOpaquePixel(element, x, y) {
+  const canvas = canvases[element.id];
+  if (!canvas) return false;
+
+  const scaleX = canvas.width / element.offsetWidth;
+  const scaleY = canvas.height / element.offsetHeight;
+
+  const adjustedX = x * scaleX;
+  const adjustedY = y * scaleY;
+
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(adjustedX, adjustedY, 1, 1);
+  const alpha = imageData.data[3];
+
+  return alpha > 0;
+}
+
 function makeDraggable(element) {
   let offsetX = 0;
   let offsetY = 0;
   let isDragging = false;
 
-  // Mouse events
   element.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    offsetX = e.clientX - parseInt(element.style.left);
-    offsetY = e.clientY - parseInt(element.style.top);
-    element.style.cursor = 'grabbing';
+    const rect = element.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    if (isOpaquePixel(element, x, y)) {
+      isDragging = true;
+      offsetX = e.clientX - parseInt(element.style.left);
+      offsetY = e.clientY - parseInt(element.style.top);
+      element.style.cursor = 'grabbing';
+    }
   });
 
   document.addEventListener('mousemove', (e) => {
@@ -89,11 +118,17 @@ function makeDraggable(element) {
 
   // Touch events for mobile support
   element.addEventListener('touchstart', (e) => {
-    isDragging = true;
     const touch = e.touches[0];
-    offsetX = touch.clientX - parseInt(element.style.left);
-    offsetY = touch.clientY - parseInt(element.style.top);
-    element.style.cursor = 'grabbing';
+    const rect = element.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    if (isOpaquePixel(element, x, y)) {
+      isDragging = true;
+      offsetX = touch.clientX - parseInt(element.style.left);
+      offsetY = touch.clientY - parseInt(element.style.top);
+      element.style.cursor = 'grabbing';
+    }
   });
 
   document.addEventListener('touchmove', (e) => {
@@ -113,7 +148,11 @@ function makeDraggable(element) {
   });
 }
 
-// Check if the piece is near its ideal position and snap into place
+const idealPositions = {
+  kcat: { x: window.innerWidth / 2 - 43, y: window.innerHeight / 2 - 113 },
+  mcat: { x: window.innerWidth / 2 + 30, y: window.innerHeight / 2 - 100 },
+};
+
 function checkPlacement(piece) {
   const pieceId = piece.id;
   const idealPos = idealPositions[pieceId];
@@ -123,21 +162,18 @@ function checkPlacement(piece) {
   };
 
   const distance = Math.hypot(currentPos.x - idealPos.x, currentPos.y - idealPos.y);
-  const snapThreshold = 200; // You can adjust this threshold
+  const snapThreshold = 200;
 
   if (distance < snapThreshold) {
-    // Snap the piece to its ideal position
     piece.style.left = idealPos.x + 'px';
     piece.style.top = idealPos.y + 'px';
     piece.dataset.placed = 'true';
 
-    // Increase the placed pieces count if not already counted
     if (!piece.dataset.counted) {
       placedPieces++;
       piece.dataset.counted = 'true';
     }
 
-    // Check if all pieces are placed
     if (placedPieces === 2) {
       setTimeout(() => {
         alert('Congratulations!');
@@ -146,5 +182,3 @@ function checkPlacement(piece) {
   }
 }
 
-// Start the puzzle
-startPuzzle();
