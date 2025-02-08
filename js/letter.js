@@ -105,15 +105,16 @@ function createEnvelope() {
   // Adjust envelope body position if needed
   envelopeBody.position.y = -0.5; // Align bottom edge to y= -1
 
-  // Create the triangular flap using ShapeGeometry
-  const flapShape = new THREE.Shape();
-  flapShape.moveTo(-1, 0);    // Bottom left corner
-  flapShape.lineTo(1, 0);     // Bottom right corner
-  flapShape.lineTo(0, 1);     // Top center point
-  flapShape.lineTo(-1, 0);    // Close the shape
+  // Create the triangular flap pointing downward
+    const flapShape = new THREE.Shape();
+    flapShape.moveTo(-1, 0);    // Top left corner (aligns with top left of envelope)
+    flapShape.lineTo(1, 0);     // Top right corner (aligns with top right of envelope)
+    flapShape.lineTo(0, -0.6);    // Bottom center point (tip of the flap)
+    flapShape.lineTo(-1, 0);    // Close the shape
+
 
   const flapGeometry = new THREE.ShapeGeometry(flapShape);
-  flapGeometry.translate(0, -0.5, 0); // Move pivot to bottom edge
+  flapGeometry.translate(0, 0, 0); // Move pivot to bottom edge
 
   const flap = new THREE.Mesh(flapGeometry, flapMaterial);
 
@@ -133,13 +134,13 @@ function createEnvelope() {
   flap.add(flapOutline);
 
   // Create the seal and attach it to the tip of the flap
-  const sealGeometry = new THREE.CircleGeometry(0.1, 32);
+  const sealGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.02, 32);
   const seal = new THREE.Mesh(sealGeometry, sealMaterial);
 
   // Calculate flap tip position
-  const flapTipY = flap.position.y + 0.5; // Since the flap's local y ranges from -0.5 to 0.5
-
+  const flapTipY = flap.position.y - 0.6; // Since the flap's local y ranges from -0.5 to 0.5
   seal.position.set(0, flapTipY, 0.011); // Slightly in front of the flap
+  seal.rotation.x = Math.PI / 2; // Align the seal facing forward
   scene.add(seal);
 
   // Add outline to seal
@@ -246,34 +247,40 @@ const mouse = new THREE.Vector2();
 renderer.domElement.addEventListener('click', onDocumentMouseClick, false);
 
 function onDocumentMouseClick(event) {
-  event.preventDefault();
-
-  mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-  mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-
-  raycaster.setFromCamera(mouse, camera);
-
-  // Check for clicks on the seal or letter
-  const objects = [envelopeObjects.seal];
-
-  if (isEnvelopeOpened) {
-    objects.push(envelopeObjects.letter);
-  }
-
-  const intersects = raycaster.intersectObjects(objects);
+    event.preventDefault();
   
-  if (intersects.length > 0) {
-    const intersectedObject = intersects[0].object;
+    mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+    mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
   
-    if (intersectedObject === envelopeObjects.seal && !isEnvelopeOpened) {
-      // Open the envelope
-      openEnvelope();
-    } else if (intersectedObject === envelopeObjects.letter) {
-      // Handle click on the letter
-      promptForAnswer();
+    raycaster.setFromCamera(mouse, camera);
+  
+    // Objects to check for intersection
+    const objects = [envelopeObjects.seal];
+  
+    if (isEnvelopeOpened) {
+      objects.push(envelopeObjects.letter);
+    }
+  
+    const intersects = raycaster.intersectObjects(objects, true);
+  
+    if (intersects.length > 0) {
+      const intersectedObject = intersects[0].object;
+  
+      if (intersectedObject === envelopeObjects.seal && !isEnvelopeOpened) {
+        console.log('Seal clicked');
+        // Open the envelope
+        openEnvelope();
+      } else if (intersectedObject === envelopeObjects.letter) {
+        console.log('Letter clicked');
+        // Handle click on the letter
+        promptForAnswer();
+      }
+    } else {
+      console.log('No intersection');
     }
   }
-}
+  
+  
 
 // Function to open the envelope
 function openEnvelope() {
@@ -374,6 +381,7 @@ function triggerLoveLetter() {
     init3DEnvelope();
   });
 }
+
 
 // Expose the function globally so it can be called from other scripts
 window.triggerLoveLetter = triggerLoveLetter;
