@@ -31,6 +31,8 @@ function loadLibraries(callback) {
 
 // Initialize the 3D envelope scene
 function init3DEnvelope() {
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
 
   // Hide other elements if necessary
   const puzzleContainer = document.getElementById('puzzleContainer');
@@ -38,55 +40,45 @@ function init3DEnvelope() {
     puzzleContainer.style.display = 'none';
   }
 
-  // Create the scene
+  // Create the scene, camera, and renderer (your existing code)
   scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 5;
 
-  // Create the camera
-  camera = new THREE.PerspectiveCamera(
-    45, // Field of view
-    window.innerWidth / window.innerHeight, // Aspect ratio
-    0.1, // Near clipping plane
-    1000 // Far clipping plane
-  );
-  camera.position.z = 5; // Move the camera away from the origin
-
-  // Create the renderer
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0x000000, 0); // Transparent background
-
-  // Raycasting for detecting clicks
-  raycaster = new THREE.Raycaster();
-  mouse = new THREE.Vector2();
-
-  // Append the renderer's canvas element to the document
+  renderer.setClearColor(0x000000, 0);
   document.body.appendChild(renderer.domElement);
-
-  // Adjust the canvas style
   renderer.domElement.style.position = 'fixed';
   renderer.domElement.style.top = '0';
   renderer.domElement.style.left = '0';
-  renderer.domElement.style.zIndex = '10000'; // Ensure it's on top
+  renderer.domElement.style.zIndex = '10000';
 
-  // Create the envelope
+  // Create the envelope (which now groups all envelope parts)
   createEnvelope();
 
-  // Enable mouse controls
-  enableMouseControls();
+  // Animate the envelope appearance (call it just once after creation)
+  animateEnvelopeAppearance();
 
-  // Handle window resize
+  // Enable mouse controls, handle window resize, etc.
+  enableMouseControls();
   window.addEventListener('resize', onWindowResize, false);
 
-  // Start the animation loop
+  // Start the render loop
   animate();
 }
 
+
+
 // Create the 3D envelope with correctly oriented flap
 function createEnvelope() {
+  // Create a group for the entire envelope
+  const envelopeGroup = new THREE.Group();
+
   // Create materials
   const envelopeMaterial = new THREE.MeshStandardMaterial({
     color: '#a3d9a5', // Mint green
-    roughness: 0.7,   // Adjust for a softer, paper-like appearance
+    roughness: 0.7,
     metalness: 0.0
   });
   
@@ -102,43 +94,46 @@ function createEnvelope() {
     side: THREE.DoubleSide,
   });
 
-  // Create the envelope body (thinner)
+  // -------------------------
+  // Create the envelope body
+  // -------------------------
   const envelopeBodyGeometry = new THREE.BoxGeometry(2, 1, 0.02);
   const envelopeBody = new THREE.Mesh(envelopeBodyGeometry, envelopeMaterial);
-  scene.add(envelopeBody);
-
-  // Add outline to envelope body
+  
+  // Add outline (wireframe) to envelope body
   const envelopeEdges = new THREE.EdgesGeometry(envelopeBodyGeometry);
   const envelopeOutline = new THREE.LineSegments(
     envelopeEdges,
     new THREE.LineBasicMaterial({ color: 0x000000 })
   );
   envelopeBody.add(envelopeOutline);
+  
+  // Position the envelope body
+  envelopeBody.position.y = -0.5; // Align bottom edge
+  
+  // Add envelope body to the group
+  envelopeGroup.add(envelopeBody);
 
-  // Adjust envelope body position if needed
-  envelopeBody.position.y = -0.5; // Align bottom edge to y= -1
-
-  // Create the triangular flap pointing downward
-    const flapShape = new THREE.Shape();
-    flapShape.moveTo(-1, 0);    // Top left corner (aligns with top left of envelope)
-    flapShape.lineTo(1, 0);     // Top right corner (aligns with top right of envelope)
-    flapShape.lineTo(0, -0.6);    // Bottom center point (tip of the flap)
-    flapShape.lineTo(-1, 0);    // Close the shape
-
+  // -------------------------
+  // Create the flap
+  // -------------------------
+  const flapShape = new THREE.Shape();
+  flapShape.moveTo(-1, 0);       // Top left corner
+  flapShape.lineTo(1, 0);        // Top right corner
+  flapShape.lineTo(0, -0.6);     // Bottom center point (tip)
+  flapShape.lineTo(-1, 0);       // Close the shape
 
   const flapGeometry = new THREE.ShapeGeometry(flapShape);
-  flapGeometry.translate(0, 0, 0); // Move pivot to bottom edge
+  // No translation needed if pivot is already at the bottom edge
 
   flap = new THREE.Mesh(flapGeometry, flapMaterial);
-
+  
   // Position the flap
-  flap.position.y = 0.0;     // Align with the top edge of the envelope body
-  flap.position.z = 0.01;    // Slightly in front of the envelope body
-  flap.rotation.x = 0;       // Ensure the flap is closed at the start
-
-  scene.add(flap);
-
-  // Add outline to flap
+  flap.position.y = 0.0;      // Align with top edge of envelope body
+  flap.position.z = 0.01;     // Slightly in front of the body
+  flap.rotation.x = 0;        // Closed at start
+  
+  // Add outline (wireframe) to flap
   const flapEdges = new THREE.EdgesGeometry(flapGeometry);
   const flapOutline = new THREE.LineSegments(
     flapEdges,
@@ -146,46 +141,56 @@ function createEnvelope() {
   );
   flap.add(flapOutline);
 
-  // Create the seal and attach it to the tip of the flap
+  // Add flap to the group
+  envelopeGroup.add(flap);
+
+  // -------------------------
+  // Create the seal
+  // -------------------------
   const sealGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.02, 32);
   seal = new THREE.Mesh(sealGeometry, sealMaterial);
-
-  // Calculate flap tip position
-  const flapTipY = flap.position.y - 0.6; // Since the flap's local y ranges from -0.5 to 0.5
+  
+  // Calculate the seal position at the tip of the flap
+  const flapTipY = flap.position.y - 0.6;
   seal.position.set(0, flapTipY, 0.02); // Slightly in front of the flap
-  seal.rotation.x = Math.PI / 2; // Align the seal facing forward
-  scene.add(seal);
-  seal.raycast = THREE.Object3D.prototype.raycast; // If for some reason it was disabled
-
-  console.log("Seal object:", seal);
-  console.log("Seal UUID:", seal.uuid);
+  seal.rotation.x = Math.PI / 2; // Face forward
+  
+  // Name the seal (used for interaction)
   seal.name = "seal";
   flap.name = "flap";
-
-
-  // Add outline to seal
+  
+  // Add outline (wireframe) to seal
   const sealEdges = new THREE.EdgesGeometry(sealGeometry);
   const sealOutline = new THREE.LineSegments(
     sealEdges,
     new THREE.LineBasicMaterial({ color: 0x000000 })
   );
   seal.add(sealOutline);
+  
+  // Add seal to the group
+  envelopeGroup.add(seal);
 
-  // Create the letter as a thin plane
+  // -------------------------
+  // Add the complete envelope group to the scene
+  // -------------------------
+  scene.add(envelopeGroup);
+
+  // -------------------------
+  // Create the letter (separate from the envelope group)
+  // -------------------------
   const letterGeometry = new THREE.PlaneGeometry(1.8, 1.0);
-  const oldPaperColor = new THREE.Color('#f4e1c1');  // Light tan color for old paper
+  const oldPaperColor = new THREE.Color('#f4e1c1');  // Light tan for old paper
 
   const letterMaterial = new THREE.MeshPhongMaterial({
-    color: oldPaperColor,  // Apply the old paper color to the material
+    color: oldPaperColor,
     side: THREE.DoubleSide,
     transparent: true,
     opacity: 0,
   });
   const letter = new THREE.Mesh(letterGeometry, letterMaterial);
-  letter.position.z = -0.005; // Slightly behind the envelope body
+  letter.position.z = -0.005; // Behind the envelope body
   letter.position.y = -0.5;   // Start inside the envelope
   scene.add(letter);
-
 
   // Add outline to letter
   const letterEdges = new THREE.EdgesGeometry(letterGeometry);
@@ -193,21 +198,33 @@ function createEnvelope() {
     letterEdges,
     new THREE.LineBasicMaterial({ color: 0x000000 })
   );
+  letterOutline.visible = false;
   letter.add(letterOutline);
 
-  // Adjust lights
-  const ambientLight = new THREE.AmbientLight(0xf4e1c1, 0.5); // Match the old paper color a bit
+  // -------------------------
+  // Adjust lighting
+  // -------------------------
+  const ambientLight = new THREE.AmbientLight(0xf4e1c1, 0.5);
   scene.add(ambientLight);
 
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-  directionalLight.position.set(0, 1, 1).normalize();
+  directionalLight.position.set(0, 1, -1).normalize();  // Now the light comes from in front of the letter
   scene.add(directionalLight);
 
-  // Store objects for interaction
-  envelopeObjects = { envelopeBody, flap, seal, letter };
-  
-  
+
+  // -------------------------
+  // Store envelope objects for interaction and animation
+  // -------------------------
+  envelopeObjects = {
+    envelope: envelopeGroup, // The complete envelope group
+    envelopeBody,
+    flap,
+    seal,
+    letter
+  };
 }
+
+
 
 // Handle window resize
 function onWindowResize() {
@@ -317,16 +334,22 @@ function onDocumentMouseClick(event) {
 function openEnvelope() {
   isEnvelopeOpened = true;
 
+  // Retrieve the flap from the envelope group by its name
+  const flapObj = envelopeObjects.envelope.getObjectByName("flap");
+  if (!flapObj) {
+    console.error("Flap object not found in envelope group!");
+    return;
+  }
+
   // Animate the flap opening around the X-axis
-  flap = envelopeObjects.flap;
-  gsap.to(flap.rotation, {
+  gsap.to(flapObj.rotation, {
     x: -Math.PI * (200 / 180), // Rotate around 200 degrees
     duration: 1,
   });
 
-  // Move the flap's position to the back side (negative y direction)
-  gsap.to(flap.position, {
-    z: -0.02, // Move flap to the back side of the envelope (negative width)
+  // Animate the flap's position (move it to the back side)
+  gsap.to(flapObj.position, {
+    z: -0.02, // Move flap to the back side
     duration: 1,
     onComplete: () => {
       // After the flap opens, slide out the letter
@@ -334,14 +357,29 @@ function openEnvelope() {
     },
   });
 
-  // Remove the seal
-  scene.remove(envelopeObjects.seal);
+  // Retrieve and remove the seal from its parent group
+  const sealObj = envelopeObjects.envelope.getObjectByName("seal");
+  if (sealObj && sealObj.parent) {
+    sealObj.parent.remove(sealObj);
+  }
+
+  // Play a sound effect (replace the path with your sound file)
+  const audio = new Audio('sounds/envelope-open.mp3');
+  audio.play().catch(err => {
+    console.error("Error playing sound:", err);
+  });
 }
+
 
 // Function to slide out the letter
 function slideOutLetter() {
   const letter = envelopeObjects.letter;
-
+  
+  // Correct the letter orientation so its content faces the camera.
+  // By default, the letter's front face is defined for positive Z.
+  // Since the envelope rotated 180º, we flip the letter back.
+  letter.rotation.y = Math.PI; 
+  
   // Animate the letter sliding up
   gsap.to(letter.position, {
     y: 0.5, // Move the letter upward
@@ -351,13 +389,14 @@ function slideOutLetter() {
       showLetterContent();
     },
   });
-
+  
   // Fade in the letter
   gsap.to(letter.material, {
     opacity: 1,
     duration: 1,
   });
 }
+
 
 // Function to display the letter content as a texture
 // Function to display the letter content as a texture
@@ -500,32 +539,49 @@ function showPopUp() {
 
 // Function to animate the envelope appearing
 function animateEnvelopeAppearance() {
-  const envelope = envelopeObjects.envelope; // Assuming this is your envelope object
+  // Get the envelope group
+  const envelope = envelopeObjects.envelope;
+  if (!envelope) return;
 
-  // Set initial state: small, centered, and rotated
-  envelope.scale.set(0, 0, 0);
-  envelope.position.set(0, 0, 0);
+  // Set the initial state:
+  // Start very small at the center and a bit in front (z = 2)
+  envelope.scale.set(0.1, 0.1, 0.1);
+  envelope.position.set(0, 0, 2);
   envelope.rotation.set(0, 0, 0);
 
-  // Animate the envelope appearing with spinning and scaling
+  // Animate scaling up to full size
   gsap.to(envelope.scale, {
-    x: 1, y: 1, z: 1, // Grow to full size
+    x: 1, y: 1, z: 1,
     duration: 1.5,
-    ease: "power2.out",
+    ease: "power2.out"
   });
 
+  // Animate position (moving along z so it comes into view)
   gsap.to(envelope.position, {
-    y: -0.5, // Move to its final position
+    z: 0,
     duration: 1.5,
-    ease: "power2.out",
+    ease: "power2.out"
   });
 
+  // Animate rotation: spin and end with its back facing the viewer
+  // (Rotating around the y-axis so it ends at Math.PI)
   gsap.to(envelope.rotation, {
-    z: Math.PI * 4, // Spin 4 full times
+    y: Math.PI,
     duration: 1.5,
     ease: "power2.out",
+    onComplete: function() {
+      // Once the envelope animation is finished, reveal the letter's wireframe.
+      envelopeObjects.letter.traverse(child => {
+        if (child.type === "LineSegments") {
+          child.visible = true;
+        }
+      });
+    }
   });
 }
+
+
+
 
 
 
