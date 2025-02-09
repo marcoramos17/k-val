@@ -5,6 +5,16 @@ let scene, camera, renderer, mouse, raycaster, seal, flap;
 let envelopeObjects = {};
 let isEnvelopeOpened = false;
 
+const letterMessage = `
+  Dear Kinza,
+
+  I would like to apologize for every 
+
+  Will you be my Valentine?
+`;
+
+
+
 // Dynamically load Three.js and GSAP libraries
 function loadLibraries(callback) {
   // Load Three.js
@@ -94,46 +104,42 @@ function createEnvelope() {
     side: THREE.DoubleSide,
   });
 
-  // -------------------------
-  // Create the envelope body
-  // -------------------------
+  // Create the envelope body (thinner)
   const envelopeBodyGeometry = new THREE.BoxGeometry(2, 1, 0.02);
   const envelopeBody = new THREE.Mesh(envelopeBodyGeometry, envelopeMaterial);
   
-  // Add outline (wireframe) to envelope body
+  // Add outline to envelope body
   const envelopeEdges = new THREE.EdgesGeometry(envelopeBodyGeometry);
   const envelopeOutline = new THREE.LineSegments(
     envelopeEdges,
     new THREE.LineBasicMaterial({ color: 0x000000 })
   );
   envelopeBody.add(envelopeOutline);
-  
-  // Position the envelope body
+
+  // Adjust envelope body position
   envelopeBody.position.y = -0.5; // Align bottom edge
   
   // Add envelope body to the group
   envelopeGroup.add(envelopeBody);
 
-  // -------------------------
-  // Create the flap
-  // -------------------------
+  // Create the triangular flap pointing downward
   const flapShape = new THREE.Shape();
-  flapShape.moveTo(-1, 0);       // Top left corner
-  flapShape.lineTo(1, 0);        // Top right corner
-  flapShape.lineTo(0, -0.6);     // Bottom center point (tip)
-  flapShape.lineTo(-1, 0);       // Close the shape
+  flapShape.moveTo(-1, 0);    // Top left corner
+  flapShape.lineTo(1, 0);     // Top right corner
+  flapShape.lineTo(0, -0.6);  // Bottom center point (tip)
+  flapShape.lineTo(-1, 0);    // Close the shape
 
   const flapGeometry = new THREE.ShapeGeometry(flapShape);
-  // No translation needed if pivot is already at the bottom edge
+  flapGeometry.translate(0, 0, 0);
 
   flap = new THREE.Mesh(flapGeometry, flapMaterial);
   
   // Position the flap
-  flap.position.y = 0.0;      // Align with top edge of envelope body
-  flap.position.z = 0.01;     // Slightly in front of the body
-  flap.rotation.x = 0;        // Closed at start
+  flap.position.y = 0.0;
+  flap.position.z = 0.01;
+  flap.rotation.x = 0;
   
-  // Add outline (wireframe) to flap
+  // Add outline to flap
   const flapEdges = new THREE.EdgesGeometry(flapGeometry);
   const flapOutline = new THREE.LineSegments(
     flapEdges,
@@ -144,40 +150,31 @@ function createEnvelope() {
   // Add flap to the group
   envelopeGroup.add(flap);
 
-  // -------------------------
-  // Create the seal
-  // -------------------------
+  // Create the seal and attach it to the tip of the flap
   const sealGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.02, 32);
   seal = new THREE.Mesh(sealGeometry, sealMaterial);
   
-  // Calculate the seal position at the tip of the flap
   const flapTipY = flap.position.y - 0.6;
-  seal.position.set(0, flapTipY, 0.02); // Slightly in front of the flap
-  seal.rotation.x = Math.PI / 2; // Face forward
-  
-  // Name the seal (used for interaction)
+  seal.position.set(0, flapTipY, 0.02);
+  seal.rotation.x = Math.PI / 2;
   seal.name = "seal";
   flap.name = "flap";
   
-  // Add outline (wireframe) to seal
+  // Add outline to seal
   const sealEdges = new THREE.EdgesGeometry(sealGeometry);
   const sealOutline = new THREE.LineSegments(
     sealEdges,
     new THREE.LineBasicMaterial({ color: 0x000000 })
   );
   seal.add(sealOutline);
-  
+
   // Add seal to the group
   envelopeGroup.add(seal);
 
-  // -------------------------
   // Add the complete envelope group to the scene
-  // -------------------------
   scene.add(envelopeGroup);
 
-  // -------------------------
   // Create the letter (separate from the envelope group)
-  // -------------------------
   const letterGeometry = new THREE.PlaneGeometry(1.8, 1.0);
   const oldPaperColor = new THREE.Color('#f4e1c1');  // Light tan for old paper
 
@@ -188,11 +185,11 @@ function createEnvelope() {
     opacity: 0,
   });
   const letter = new THREE.Mesh(letterGeometry, letterMaterial);
-  letter.position.z = -0.005; // Behind the envelope body
-  letter.position.y = -0.5;   // Start inside the envelope
+  letter.position.z = -0.005;
+  letter.position.y = -0.5;
   scene.add(letter);
 
-  // Add outline to letter
+  // Add outline to letter and initially hide it
   const letterEdges = new THREE.EdgesGeometry(letterGeometry);
   const letterOutline = new THREE.LineSegments(
     letterEdges,
@@ -201,28 +198,118 @@ function createEnvelope() {
   letterOutline.visible = false;
   letter.add(letterOutline);
 
-  // -------------------------
   // Adjust lighting
-  // -------------------------
   const ambientLight = new THREE.AmbientLight(0xf4e1c1, 0.5);
   scene.add(ambientLight);
 
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-  directionalLight.position.set(0, 1, -1).normalize();  // Now the light comes from in front of the letter
+  directionalLight.position.set(0, 1, -1).normalize();
   scene.add(directionalLight);
 
-
-  // -------------------------
-  // Store envelope objects for interaction and animation
-  // -------------------------
+  // Store envelope objects for later reference and animation
   envelopeObjects = {
-    envelope: envelopeGroup, // The complete envelope group
+    envelope: envelopeGroup,
     envelopeBody,
     flap,
     seal,
     letter
   };
+
+  // Add the envelope back detail (text and images) to the envelope group
+  addEnvelopeBackDetail();
 }
+
+
+function createEnvelopeBackTexture() {
+  // Create a canvas element
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 512;
+  const context = canvas.getContext('2d');
+  
+  // Fill the background with the envelope color (mint green)
+  context.fillStyle = '#a3d9a5';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw "From: Marco" at the top left
+  context.font = "48px Arial";
+  context.fillStyle = "#000";
+  context.textAlign = "left";
+  context.fillText("From: Marco", 50, 70); // Coordinates: (50,70)
+  
+  // Draw "To: Kinza" at the bottom right
+  context.textAlign = "right";
+  context.fillText("To: Kinza", canvas.width - 50, canvas.height - 30); // Coordinates: (canvas.width-50, canvas.height-30)
+  
+  // --- Draw 3 Images ---
+  // Create three image objects with placeholder sources (change these URLs as needed)
+  const img1 = new Image();
+  const img2 = new Image();
+  const img3 = new Image();
+  img1.src = 'img/dino.png';
+  img2.src = 'img/strawberry.png';
+  img3.src = 'img/stamp.png';
+  
+  // Define coordinates and sizes for each image (adjust as desired)
+  const img1Coords = { x: 100, y: 100, width: 250, height: 250 };
+  const img2Coords = { x: 500, y: 280, width: 200, height: 260 };
+  const img3Coords = { x: 800, y: 50, width: 200, height: 200 };
+  
+  // Create a canvas texture now so we can update it when images load.
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.minFilter = THREE.LinearFilter;
+  
+  // When each image loads, draw it on the canvas and update the texture.
+   // When each image loads, draw it on the canvas and update the texture.
+   img1.onload = function() {
+    context.save(); // Save the current context state
+    context.translate(img1Coords.x + img1Coords.width / 2, img1Coords.y + img1Coords.height / 2); // Move to the image's center
+    context.rotate(Math.PI / 18);  // Rotate the image by 10 degrees
+    context.drawImage(img1, -img1Coords.width / 2, -img1Coords.height / 2, img1Coords.width, img1Coords.height);  // Draw image centered
+    context.restore();  // Restore the context to its original state
+    texture.needsUpdate = true;
+  };
+
+  img2.onload = function() {
+    context.save(); // Save the current context state
+    context.translate(img2Coords.x + img2Coords.width / 2, img2Coords.y + img2Coords.height / 2); // Move to the image's center
+    context.rotate(Math.PI / -24);  // Rotate the image by 7.5 degrees
+    context.drawImage(img2, -img2Coords.width / 2, -img2Coords.height / 2, img2Coords.width, img2Coords.height);  // Draw image centered
+    context.restore();  // Restore the context to its original state
+    texture.needsUpdate = true;
+  };
+  img3.onload = function() {
+    context.drawImage(img3, img3Coords.x, img3Coords.y, img3Coords.width, img3Coords.height);
+    texture.needsUpdate = true;
+  };
+  
+  return texture;
+}
+
+
+function addEnvelopeBackDetail() {
+  // Create a plane geometry the same size as the envelope body (2 x 1)
+  const geometry = new THREE.PlaneGeometry(2, 1);
+  
+  // Create a material using the canvas texture
+  const texture = createEnvelopeBackTexture();
+  const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: true });
+  
+  const backDetail = new THREE.Mesh(geometry, material);
+  
+  // Position the back detail on the back side of the envelope.
+  // The envelope body is centered at y = -0.5; its thickness is 0.02.
+  // We offset slightly on the z-axis (e.g., -0.011) so that it sits on the back.
+  backDetail.position.set(0, -0.5, -0.011);
+  
+  // Apply a negative scale on the x-axis to mirror the texture horizontally
+  backDetail.scale.x = -1;
+  
+
+  // Add the back detail as a child of the envelope group
+  envelopeObjects.envelope.add(backDetail);
+}
+
 
 
 
@@ -320,6 +407,10 @@ function onDocumentMouseClick(event) {
     if (intersectedObject.name === "seal" || intersectedObject.name === "flap") {
         console.log("Seal or Flap clicked!");
         openEnvelope();
+        // Trigger the pop-up after some delay (you can adjust this timing)
+        setTimeout(() => {
+          showPopUp();
+        }, 3000);  // Show the pop-up after 5 seconds
         break; // Stop checking after finding the first valid object
     }
     }
@@ -425,13 +516,8 @@ function showLetterContent() {
   const maxWidth = canvas.width - 2 * margin;  // Max width for text
   const lineHeight = 50; // Increase line height for better spacing
 
-  const message = `
-  My dearest [Name],
-
-  From the moment we met, you've brought so much joy and warmth into my life. Your smile lights up my day, and every moment with you is a treasure. I can't imagine this journey without you by my side.
-
-  Will you be my Valentine?
-  `;
+  // Use the shared message
+  const message = letterMessage;
 
   // Split the message into lines and adjust text to fit within the margins
   const lines = message.trim().split('\n');
@@ -461,6 +547,7 @@ function showLetterContent() {
   letter.material.map = texture;
   letter.material.needsUpdate = true;
 }
+
 
 
 // Function to prompt for an answer
@@ -495,11 +582,7 @@ function showPopUp() {
   
   // Add the love message
   const message = document.createElement('p');
-  message.innerHTML = `
-    My Dearest [Name],<br><br>
-    From the moment we met, you've brought so much joy and warmth into my life. Your smile lights up my day, and every moment with you is a treasure. I can't imagine this journey without you by my side.<br><br>
-    Will you be my Valentine?
-  `;
+  message.innerHTML = letterMessage.replace(/\n/g, '<br>'); // Replace newlines with <br> for HTML formatting
   letterContent.appendChild(message);
 
   // Create buttons (Yes and No)
@@ -537,6 +620,7 @@ function showPopUp() {
 }
 
 
+
 // Function to animate the envelope appearing
 function animateEnvelopeAppearance() {
   // Get the envelope group
@@ -552,14 +636,14 @@ function animateEnvelopeAppearance() {
   // Animate scaling up to full size
   gsap.to(envelope.scale, {
     x: 1, y: 1, z: 1,
-    duration: 1.5,
+    duration: 5,
     ease: "power2.out"
   });
 
   // Animate position (moving along z so it comes into view)
   gsap.to(envelope.position, {
     z: 0,
-    duration: 1.5,
+    duration: 5,
     ease: "power2.out"
   });
 
@@ -567,7 +651,7 @@ function animateEnvelopeAppearance() {
   // (Rotating around the y-axis so it ends at Math.PI)
   gsap.to(envelope.rotation, {
     y: Math.PI,
-    duration: 1.5,
+    duration: 5,
     ease: "power2.out",
     onComplete: function() {
       // Once the envelope animation is finished, reveal the letter's wireframe.
@@ -585,10 +669,7 @@ function animateEnvelopeAppearance() {
 
 
 
-// Trigger the pop-up after some delay (you can adjust this timing)
-setTimeout(() => {
-  showPopUp();
-}, 5000);  // Show the pop-up after 5 seconds
+
 
 
 
