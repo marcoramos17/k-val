@@ -1,7 +1,7 @@
 // letter.js
 
 // Global variables
-let scene, camera, renderer, mouse, raycaster, seal, flap;
+let scene, camera, renderer;
 let envelopeObjects = {};
 let isEnvelopeOpened = false;
 
@@ -31,7 +31,6 @@ function loadLibraries(callback) {
 
 // Initialize the 3D envelope scene
 function init3DEnvelope() {
-
   // Hide other elements if necessary
   const puzzleContainer = document.getElementById('puzzleContainer');
   if (puzzleContainer) {
@@ -54,10 +53,6 @@ function init3DEnvelope() {
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(0x000000, 0); // Transparent background
-
-  // Raycasting for detecting clicks
-  raycaster = new THREE.Raycaster();
-  mouse = new THREE.Vector2();
 
   // Append the renderer's canvas element to the document
   document.body.appendChild(renderer.domElement);
@@ -121,7 +116,7 @@ function createEnvelope() {
   const flapGeometry = new THREE.ShapeGeometry(flapShape);
   flapGeometry.translate(0, 0, 0); // Move pivot to bottom edge
 
-  flap = new THREE.Mesh(flapGeometry, flapMaterial);
+  const flap = new THREE.Mesh(flapGeometry, flapMaterial);
 
   // Position the flap
   flap.position.y = 0.0;     // Align with the top edge of the envelope body
@@ -140,20 +135,13 @@ function createEnvelope() {
 
   // Create the seal and attach it to the tip of the flap
   const sealGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.02, 32);
-  seal = new THREE.Mesh(sealGeometry, sealMaterial);
+  const seal = new THREE.Mesh(sealGeometry, sealMaterial);
 
   // Calculate flap tip position
   const flapTipY = flap.position.y - 0.6; // Since the flap's local y ranges from -0.5 to 0.5
-  seal.position.set(0, flapTipY, 0.02); // Slightly in front of the flap
+  seal.position.set(0, flapTipY, 0.011); // Slightly in front of the flap
   seal.rotation.x = Math.PI / 2; // Align the seal facing forward
   scene.add(seal);
-  seal.raycast = THREE.Object3D.prototype.raycast; // If for some reason it was disabled
-
-  console.log("Seal object:", seal);
-  console.log("Seal UUID:", seal.uuid);
-  seal.name = "seal";
-  flap.name = "flap";
-
 
   // Add outline to seal
   const sealEdges = new THREE.EdgesGeometry(sealGeometry);
@@ -165,10 +153,8 @@ function createEnvelope() {
 
   // Create the letter as a thin plane
   const letterGeometry = new THREE.PlaneGeometry(1.8, 1.0);
-  const oldPaperColor = new THREE.Color('#f4e1c1');  // Light tan color for old paper
-
   const letterMaterial = new THREE.MeshPhongMaterial({
-    color: oldPaperColor,  // Apply the old paper color to the material
+    color: 0xffffff,
     side: THREE.DoubleSide,
     transparent: true,
     opacity: 0,
@@ -254,51 +240,45 @@ function animate() {
   renderer.render(scene, camera);
 }
 
+// Raycasting for detecting clicks
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
-
-
+renderer.domElement.addEventListener('click', onDocumentMouseClick, false);
 
 function onDocumentMouseClick(event) {
-    // Convert mouse click position to normalized device coordinates (NDC)
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    event.preventDefault();
   
-    console.log(`Mouse position: x = ${mouse.x}, y = ${mouse.y}`);
+    mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+    mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
   
-    // Update the raycaster
     raycaster.setFromCamera(mouse, camera);
-    console.log("Raycaster updated!");
   
-    
-
-    // Check for intersections
-    const objectsToCheck = [seal, flap]; // Only check these
-    const intersects = raycaster.intersectObjects(objectsToCheck, true);
-
-    console.log(`Intersects found: ${intersects.length}`);
-
-    for (let i = 0; i < intersects.length; i++) {
-    const intersectedObject = intersects[i].object;
-    
-    console.log("Intersected object:", intersectedObject);
-
-    // Ignore LineSegments (outlines)
-    if (intersectedObject.type === "LineSegments") {
-        console.log("Skipping LineSegments object");
-        continue;
+    // Objects to check for intersection
+    const objects = [envelopeObjects.seal];
+  
+    if (isEnvelopeOpened) {
+      objects.push(envelopeObjects.letter);
     }
-
-    // Check if the clicked object is the seal or the flap
-    if (intersectedObject.name === "seal" || intersectedObject.name === "flap") {
-        console.log("Seal or Flap clicked!");
+  
+    const intersects = raycaster.intersectObjects(objects, true);
+  
+    if (intersects.length > 0) {
+      const intersectedObject = intersects[0].object;
+  
+      if (intersectedObject === envelopeObjects.seal && !isEnvelopeOpened) {
+        console.log('Seal clicked');
+        // Open the envelope
         openEnvelope();
-        break; // Stop checking after finding the first valid object
+      } else if (intersectedObject === envelopeObjects.letter) {
+        console.log('Letter clicked');
+        // Handle click on the letter
+        promptForAnswer();
+      }
+    } else {
+      console.log('No intersection');
     }
-    }
-
   }
-  
-
   
   
 
@@ -307,15 +287,9 @@ function openEnvelope() {
   isEnvelopeOpened = true;
 
   // Animate the flap opening around the X-axis
-  flap = envelopeObjects.flap;
+  const flap = envelopeObjects.flap;
   gsap.to(flap.rotation, {
-    x: -Math.PI * (200 / 180), // Rotate around 200 degrees
-    duration: 1,
-  });
-
-  // Move the flap's position to the back side (negative y direction)
-  gsap.to(flap.position, {
-    z: -0.02, // Move flap to the back side of the envelope (negative width)
+    x: -Math.PI / 2,
     duration: 1,
     onComplete: () => {
       // After the flap opens, slide out the letter
@@ -349,31 +323,22 @@ function slideOutLetter() {
 }
 
 // Function to display the letter content as a texture
-// Function to display the letter content as a texture
 function showLetterContent() {
   const letter = envelopeObjects.letter;
 
-  // Increase canvas resolution for better text quality
+  // Create a canvas for the letter content
   const canvas = document.createElement('canvas');
-  const canvasWidth = 1024;  // Increase the resolution
-  const canvasHeight = 1024; // Increase the resolution
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
+  canvas.width = 512;
+  canvas.height = 512;
   const context = canvas.getContext('2d');
 
-  // Draw the letter background (light beige color)
+  // Draw the letter content on the canvas
   context.fillStyle = '#faf0e6'; // Light beige color
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Draw the text with improved styling and margins
-  context.fillStyle = '#000000'; // Black color for text
-  context.font = '40px Great Vibes, cursive'; // Larger font size for better visibility
+  context.fillStyle = '#000000';
+  context.font = '32px Great Vibes, cursive';
   context.textAlign = 'center';
-  context.textBaseline = 'top';  // Align text to the top for better spacing
-
-  const margin = 100;  // Add margin for text positioning
-  const maxWidth = canvas.width - 2 * margin;  // Max width for text
-  const lineHeight = 50; // Increase line height for better spacing
 
   const message = `
   My dearest [Name],
@@ -383,35 +348,20 @@ function showLetterContent() {
   Will you be my Valentine?
   `;
 
-  // Split the message into lines and adjust text to fit within the margins
+  // Split the message into lines
   const lines = message.trim().split('\n');
-  let y = margin; // Start drawing from the top margin
+  let y = 100;
+  const lineHeight = 40;
   for (const line of lines) {
-    // Wrap text to fit within the max width
-    const words = line.trim().split(' ');
-    let currentLine = '';
-    for (let word of words) {
-      const testLine = currentLine + word + ' ';
-      const testWidth = context.measureText(testLine).width;
-      if (testWidth > maxWidth && currentLine !== '') {
-        context.fillText(currentLine, canvas.width / 2, y);
-        currentLine = word + ' ';
-        y += lineHeight;
-      } else {
-        currentLine = testLine;
-      }
-    }
-    context.fillText(currentLine, canvas.width / 2, y);
+    context.fillText(line.trim(), canvas.width / 2, y);
     y += lineHeight;
   }
 
   // Create a texture from the canvas
   const texture = new THREE.CanvasTexture(canvas);
-  texture.minFilter = THREE.LinearFilter;  // Apply linear filtering for better texture quality
   letter.material.map = texture;
   letter.material.needsUpdate = true;
 }
-
 
 // Function to prompt for an answer
 function promptForAnswer() {
@@ -429,68 +379,8 @@ function promptForAnswer() {
 function triggerLoveLetter() {
   loadLibraries(() => {
     init3DEnvelope();
-    renderer.domElement.addEventListener('click', onDocumentMouseClick, false);
   });
 }
-
-// Function to show the pop-up and add buttons dynamically
-function showPopUp() {
-  // Create the container for the love letter pop-up
-  const loveLetterContainer = document.createElement('div');
-  loveLetterContainer.id = 'loveLetterContainer';
-  
-  // Create the letter content (message and buttons)
-  const letterContent = document.createElement('div');
-  letterContent.classList.add('letter-content');
-  
-  // Add the love message
-  const message = document.createElement('p');
-  message.innerHTML = `
-    My Dearest [Name],<br><br>
-    From the moment we met, you've brought so much joy and warmth into my life. Your smile lights up my day, and every moment with you is a treasure. I can't imagine this journey without you by my side.<br><br>
-    Will you be my Valentine?
-  `;
-  letterContent.appendChild(message);
-
-  // Create buttons (Yes and No)
-  const yesButton = document.createElement('button');
-  yesButton.innerText = 'Yes';
-  yesButton.classList.add('reply-btn');
-  yesButton.addEventListener('click', () => {
-    alert('You said Yes!');  // Add further actions if needed
-    closePopUp();
-  });
-
-  const noButton = document.createElement('button');
-  noButton.innerText = 'No';
-  noButton.classList.add('reply-btn');
-  noButton.addEventListener('click', () => {
-    alert('You said No!');  // Add further actions if needed
-    closePopUp();
-  });
-
-  // Append buttons to the letter content
-  letterContent.appendChild(yesButton);
-  letterContent.appendChild(noButton);
-
-  // Append everything to the pop-up container
-  loveLetterContainer.appendChild(letterContent);
-
-  // Append the pop-up to the body
-  document.body.appendChild(loveLetterContainer);
-  
-  // Function to close the pop-up and remove it from the DOM
-  function closePopUp() {
-    loveLetterContainer.style.display = 'none';
-    document.body.removeChild(loveLetterContainer);  // Remove the pop-up from the DOM
-  }
-}
-
-// Trigger the pop-up after some delay (you can adjust this timing)
-setTimeout(() => {
-  showPopUp();
-}, 5000);  // Show the pop-up after 5 seconds
-
 
 
 // Expose the function globally so it can be called from other scripts
