@@ -84,11 +84,19 @@ function init3DEnvelope() {
 // Create the 3D envelope with correctly oriented flap
 function createEnvelope() {
   // Create materials
-  const envelopeMaterial = new THREE.MeshPhongMaterial({ color: 0xfdf5e6 });
-  const flapMaterial = new THREE.MeshPhongMaterial({
-    color: 0xf5deb3,
-    side: THREE.DoubleSide,
+  const envelopeMaterial = new THREE.MeshStandardMaterial({
+    color: '#a3d9a5', // Mint green
+    roughness: 0.7,   // Adjust for a softer, paper-like appearance
+    metalness: 0.0
   });
+  
+  const flapMaterial = new THREE.MeshStandardMaterial({
+    color: '#8fcf95', // Slightly darker mint
+    roughness: 0.7,
+    metalness: 0.0,
+    side: THREE.DoubleSide
+  });
+  
   const sealMaterial = new THREE.MeshPhongMaterial({
     color: 0xff3d68,
     side: THREE.DoubleSide,
@@ -178,6 +186,7 @@ function createEnvelope() {
   letter.position.y = -0.5;   // Start inside the envelope
   scene.add(letter);
 
+
   // Add outline to letter
   const letterEdges = new THREE.EdgesGeometry(letterGeometry);
   const letterOutline = new THREE.LineSegments(
@@ -186,16 +195,18 @@ function createEnvelope() {
   );
   letter.add(letterOutline);
 
-  // Add lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+  // Adjust lights
+  const ambientLight = new THREE.AmbientLight(0xf4e1c1, 0.5); // Match the old paper color a bit
   scene.add(ambientLight);
 
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
-  directionalLight.position.set(0, 0, 10);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  directionalLight.position.set(0, 1, 1).normalize();
   scene.add(directionalLight);
 
   // Store objects for interaction
   envelopeObjects = { envelopeBody, flap, seal, letter };
+  
+  
 }
 
 // Handle window resize
@@ -249,7 +260,7 @@ function toRadians(angle) {
 // Function to animate the scene
 function animate() {
   requestAnimationFrame(animate);
-
+  
   // Render the scene
   renderer.render(scene, camera);
 }
@@ -486,10 +497,44 @@ function showPopUp() {
   }
 }
 
+
+// Function to animate the envelope appearing
+function animateEnvelopeAppearance() {
+  const envelope = envelopeObjects.envelope; // Assuming this is your envelope object
+
+  // Set initial state: small, centered, and rotated
+  envelope.scale.set(0, 0, 0);
+  envelope.position.set(0, 0, 0);
+  envelope.rotation.set(0, 0, 0);
+
+  // Animate the envelope appearing with spinning and scaling
+  gsap.to(envelope.scale, {
+    x: 1, y: 1, z: 1, // Grow to full size
+    duration: 1.5,
+    ease: "power2.out",
+  });
+
+  gsap.to(envelope.position, {
+    y: -0.5, // Move to its final position
+    duration: 1.5,
+    ease: "power2.out",
+  });
+
+  gsap.to(envelope.rotation, {
+    z: Math.PI * 4, // Spin 4 full times
+    duration: 1.5,
+    ease: "power2.out",
+  });
+}
+
+
+
 // Trigger the pop-up after some delay (you can adjust this timing)
 setTimeout(() => {
   showPopUp();
 }, 5000);  // Show the pop-up after 5 seconds
+
+
 
 
 
