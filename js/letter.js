@@ -590,8 +590,9 @@ function showPopUp() {
   yesButton.innerText = 'Yes';
   yesButton.classList.add('reply-btn');
   yesButton.addEventListener('click', () => {
-    alert('You said Yes!');  // Add further actions if needed
-    closePopUp();
+    //alert('You said Yes!');
+    triggerExplosionAndSound();  // Trigger the explosion and sound
+    //closePopUp();  // Close the pop-up
   });
 
   const noButton = document.createElement('button');
@@ -666,7 +667,59 @@ function animateEnvelopeAppearance() {
 
 
 
+// Create explosion and sound effect when "Yes" is clicked
+function triggerExplosionAndSound() {
+  // Create a container for the explosion effect
+  const explosionContainer = document.createElement('div');
+  explosionContainer.classList.add('explosion-container');
 
+  // Number of emojis in the explosion
+  const numEmojis = 20;
+
+  // Emojis for the explosion effect
+  const emojis = ['🍓', '👠', '❤️', '✨', '🐻'];
+
+  // Create emoji elements and append them to the container
+  for (let i = 0; i < numEmojis; i++) {
+    const emoji = document.createElement('span');
+    emoji.classList.add('emoji');
+    emoji.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+
+    // Randomize initial position and size of the emojis
+    emoji.style.position = 'absolute';
+    emoji.style.left = `${Math.random() * 100}%`;
+    emoji.style.top = `${Math.random() * 100}%`;
+    emoji.style.fontSize = `${Math.random() * 30 + 20}px`; // Random size between 20px and 50px
+    emoji.style.opacity = '1';
+    emoji.style.transition = 'all 1s ease-out';
+
+    // Animate the explosion (random direction and distance)
+    setTimeout(() => {
+      const angle = Math.random() * 360;
+      const distance = Math.random() * 200 + 100; // Random distance between 100px and 300px
+      const xOffset = distance * Math.cos(angle);
+      const yOffset = distance * Math.sin(angle);
+
+      emoji.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+      emoji.style.opacity = '0'; // Fade out
+    }, 100);
+
+    // Append emoji to the container
+    explosionContainer.appendChild(emoji);
+  }
+
+  // Append the explosion container to the body
+  document.body.appendChild(explosionContainer);
+
+  // Play the explosion sound
+  const explosionSound = new Audio('sounds/claps.mp3');  // Replace with the actual path of your sound file
+  explosionSound.play();
+
+  // Remove explosion container after animation
+  setTimeout(() => {
+    explosionContainer.remove();
+  }, 2000);  // Remove after 1 second (when animation is complete)
+}
 
 
 

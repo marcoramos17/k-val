@@ -317,3 +317,21 @@
     opacity: 0;
   }
 }
+
+.emoji {
+  position: absolute;
+  animation: fall 5s linear infinite;
+}
+
+@keyframes fall {
+  0% {
+    top: -10vh;
+  }
+  100% {
+    top: 100vh;
+  }
+}
+
+* {
+  user-select: none;  /* Disable text selection on all elements */
+}
