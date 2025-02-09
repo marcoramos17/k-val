@@ -1,7 +1,7 @@
 // letter.js
 
 // Global variables
-let scene, camera, renderer;
+let scene, camera, renderer, mouse, raycaster, seal, flap;
 let envelopeObjects = {};
 let isEnvelopeOpened = false;
 
@@ -31,6 +31,7 @@ function loadLibraries(callback) {
 
 // Initialize the 3D envelope scene
 function init3DEnvelope() {
+
   // Hide other elements if necessary
   const puzzleContainer = document.getElementById('puzzleContainer');
   if (puzzleContainer) {
@@ -53,6 +54,10 @@ function init3DEnvelope() {
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(0x000000, 0); // Transparent background
+
+  // Raycasting for detecting clicks
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
 
   // Append the renderer's canvas element to the document
   document.body.appendChild(renderer.domElement);
@@ -116,7 +121,7 @@ function createEnvelope() {
   const flapGeometry = new THREE.ShapeGeometry(flapShape);
   flapGeometry.translate(0, 0, 0); // Move pivot to bottom edge
 
-  const flap = new THREE.Mesh(flapGeometry, flapMaterial);
+  flap = new THREE.Mesh(flapGeometry, flapMaterial);
 
   // Position the flap
   flap.position.y = 0.0;     // Align with the top edge of the envelope body
@@ -135,13 +140,20 @@ function createEnvelope() {
 
   // Create the seal and attach it to the tip of the flap
   const sealGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.02, 32);
-  const seal = new THREE.Mesh(sealGeometry, sealMaterial);
+  seal = new THREE.Mesh(sealGeometry, sealMaterial);
 
   // Calculate flap tip position
   const flapTipY = flap.position.y - 0.6; // Since the flap's local y ranges from -0.5 to 0.5
   seal.position.set(0, flapTipY, 0.011); // Slightly in front of the flap
   seal.rotation.x = Math.PI / 2; // Align the seal facing forward
   scene.add(seal);
+  seal.raycast = THREE.Object3D.prototype.raycast; // If for some reason it was disabled
+
+  console.log("Seal object:", seal);
+  console.log("Seal UUID:", seal.uuid);
+  seal.name = "seal";
+  flap.name = "flap";
+
 
   // Add outline to seal
   const sealEdges = new THREE.EdgesGeometry(sealGeometry);
@@ -240,45 +252,49 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-// Raycasting for detecting clicks
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
 
-renderer.domElement.addEventListener('click', onDocumentMouseClick, false);
+
+
 
 function onDocumentMouseClick(event) {
-    event.preventDefault();
+    // Convert mouse click position to normalized device coordinates (NDC)
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
   
-    mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-    mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+    console.log(`Mouse position: x = ${mouse.x}, y = ${mouse.y}`);
   
+    // Update the raycaster
     raycaster.setFromCamera(mouse, camera);
+    console.log("Raycaster updated!");
   
-    // Objects to check for intersection
-    const objects = [envelopeObjects.seal];
-  
-    if (isEnvelopeOpened) {
-      objects.push(envelopeObjects.letter);
+    
+
+    // Check for intersections
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    console.log(`Intersects found: ${intersects.length}`);
+
+    for (let i = 0; i < intersects.length; i++) {
+    const intersectedObject = intersects[i].object;
+    
+    console.log("Intersected object:", intersectedObject);
+
+    // Ignore LineSegments (outlines)
+    if (intersectedObject.type === "LineSegments") {
+        console.log("Skipping LineSegments object");
+        continue;
     }
-  
-    const intersects = raycaster.intersectObjects(objects, true);
-  
-    if (intersects.length > 0) {
-      const intersectedObject = intersects[0].object;
-  
-      if (intersectedObject === envelopeObjects.seal && !isEnvelopeOpened) {
-        console.log('Seal clicked');
-        // Open the envelope
-        openEnvelope();
-      } else if (intersectedObject === envelopeObjects.letter) {
-        console.log('Letter clicked');
-        // Handle click on the letter
-        promptForAnswer();
-      }
-    } else {
-      console.log('No intersection');
+
+    // Check if the clicked object is the seal or the flap
+    if (intersectedObject.name === "seal" || intersectedObject.name === "flap") {
+        console.log("Seal or Flap clicked!");
+        alert("Will you be my Valentine?");
+        break; // Stop checking after finding the first valid object
     }
+    }
+
   }
+  
+
   
   
 
@@ -287,7 +303,7 @@ function openEnvelope() {
   isEnvelopeOpened = true;
 
   // Animate the flap opening around the X-axis
-  const flap = envelopeObjects.flap;
+  flap = envelopeObjects.flap;
   gsap.to(flap.rotation, {
     x: -Math.PI / 2,
     duration: 1,
@@ -379,6 +395,7 @@ function promptForAnswer() {
 function triggerLoveLetter() {
   loadLibraries(() => {
     init3DEnvelope();
+    renderer.domElement.addEventListener('click', onDocumentMouseClick, false);
   });
 }
 
