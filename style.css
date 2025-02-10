@@ -392,3 +392,20 @@
 .loveLetter::-webkit-scrollbar-thumb:hover {
   background-color: #ff3399;
 }
+
+/* Disable text selection */
+body {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+}
+
+/* Disable image dragging */
+img {
+  -webkit-user-drag: none; /* Safari */
+  -khtml-user-drag: none; /* Konqueror HTML */
+  -moz-user-drag: none; /* Firefox */
+  -o-user-drag: none; /* Opera */
+  user-drag: none; /* Standard */
+}
