@@ -94,6 +94,7 @@ function init3DEnvelope() {
 
   // Enable mouse controls, handle window resize, etc.
   enableMouseControls();
+  enableTouchControls();
   window.addEventListener('resize', onWindowResize, false);
 
   // Start the render loop
@@ -343,69 +344,18 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// Handle window resize
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-// Mouse and touch controls for rotating the envelope
-function enableMouseControls() {
-  let isMouseDown = false;
+// Touch controls for rotating the envelope
+function enableTouchControls() {
   let isTouching = false;
-  let previousMousePosition = {
+  let previousTouchPosition = {
     x: 0,
     y: 0
   };
 
-  // Mouse events
-  renderer.domElement.addEventListener('mousedown', (event) => {
-    isMouseDown = true;
-    previousMousePosition = {
-      x: event.clientX,
-      y: event.clientY
-    };
-  });
-
-  renderer.domElement.addEventListener('mousemove', (event) => {
-    if (!isMouseDown) return;
-
-    const deltaMove = {
-      x: event.clientX - previousMousePosition.x,
-      y: event.clientY - previousMousePosition.y,
-    };
-
-    const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
-      new THREE.Euler(
-        toRadians(deltaMove.y * 0.5),
-        toRadians(deltaMove.x * 0.5),
-        0,
-        'XYZ'
-      )
-    );
-
-    envelope.quaternion.multiplyQuaternions(deltaRotationQuaternion, envelope.quaternion);
-
-    previousMousePosition = {
-      x: event.clientX,
-      y: event.clientY
-    };
-  });
-
-  renderer.domElement.addEventListener('mouseup', () => {
-    isMouseDown = false;
-  });
-
-  renderer.domElement.addEventListener('mouseleave', () => {
-    isMouseDown = false;
-  });
-
-  // Touch events
   renderer.domElement.addEventListener('touchstart', (event) => {
     if (event.touches.length === 1) {
       isTouching = true;
-      previousMousePosition = {
+      previousTouchPosition = {
         x: event.touches[0].clientX,
         y: event.touches[0].clientY
       };
@@ -416,8 +366,8 @@ function enableMouseControls() {
     if (!isTouching || event.touches.length !== 1) return;
 
     const deltaMove = {
-      x: event.touches[0].clientX - previousMousePosition.x,
-      y: event.touches[0].clientY - previousMousePosition.y,
+      x: event.touches[0].clientX - previousTouchPosition.x,
+      y: event.touches[0].clientY - previousTouchPosition.y,
     };
 
     const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
@@ -431,7 +381,7 @@ function enableMouseControls() {
 
     envelope.quaternion.multiplyQuaternions(deltaRotationQuaternion, envelope.quaternion);
 
-    previousMousePosition = {
+    previousTouchPosition = {
       x: event.touches[0].clientX,
       y: event.touches[0].clientY
     };
@@ -439,6 +389,43 @@ function enableMouseControls() {
 
   renderer.domElement.addEventListener('touchend', () => {
     isTouching = false;
+  });
+}
+
+// Mouse controls for rotating the envelope
+function enableMouseControls() {
+  let isMouseDown = false;
+
+  renderer.domElement.addEventListener('mousedown', () => {
+    isMouseDown = true;
+  });
+
+  renderer.domElement.addEventListener('mousemove', (event) => {
+    if (!isMouseDown) return;
+
+    const deltaMove = {
+      x: event.movementX || event.mozMovementX || event.webkitMovementX || 0,
+      y: event.movementY || event.mozMovementY || event.webkitMovementY || 0,
+    };
+
+    const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(
+        toRadians(deltaMove.y * 0.5),
+        toRadians(deltaMove.x * 0.5),
+        0,
+        'XYZ'
+      )
+    );
+
+    scene.quaternion.multiplyQuaternions(deltaRotationQuaternion, scene.quaternion);
+  });
+
+  renderer.domElement.addEventListener('mouseup', () => {
+    isMouseDown = false;
+  });
+
+  renderer.domElement.addEventListener('mouseleave', () => {
+    isMouseDown = false;
   });
 }
 
@@ -663,7 +650,7 @@ function playNoSound() {
 // Function to show the pop-up and add buttons dynamically
 function showPopUp() {
   scoreDisplay.textContent = "Please say yes! 🥺";
-  
+  enableScrolling();
   // Create the container for the love letter pop-up
   const loveLetterContainer = document.createElement('div');
   loveLetterContainer.id = 'loveLetterContainer';
