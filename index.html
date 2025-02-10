@@ -47,6 +47,11 @@
       event.preventDefault();
     }
   }, { passive: false });
+
+  // Allow scrolling within the loveLetter element
+  document.querySelector('.loveLetter').addEventListener('touchmove', function(event) {
+    event.stopPropagation();
+  }, { passive: false });
 </script>
 </body>
 </html>
