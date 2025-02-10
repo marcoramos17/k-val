@@ -284,6 +284,8 @@ function checkPlacement(piece) {
 
     // Trigger the love letter/envelope only when both pieces are placed
     if (placedPieces === 2) {
+      const sound = new Audio('sounds/claps.mp3'); // Replace with your sound file path
+      sound.play();
       setTimeout(() => {
         triggerLoveLetter();  // Trigger the love letter animation or action
       }, 3000);

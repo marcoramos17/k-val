@@ -82,6 +82,7 @@ function init3DEnvelope() {
 
 // Create the 3D envelope with correctly oriented flap
 function createEnvelope() {
+  drawScenery();  // Draw the background scenery
   // Create a group for the entire envelope
   const envelopeGroup = new THREE.Group();
 
@@ -252,7 +253,7 @@ function createEnvelopeBackTexture() {
   
   // Define coordinates and sizes for each image (adjust as desired)
   const img1Coords = { x: 100, y: 100, width: 250, height: 250 };
-  const img2Coords = { x: 500, y: 280, width: 200, height: 260 };
+  const img2Coords = { x: 550, y: 280, width: 200, height: 260 };
   const img3Coords = { x: 800, y: 50, width: 200, height: 200 };
   
   // Create a canvas texture now so we can update it when images load.

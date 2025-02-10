@@ -8,10 +8,10 @@ const scoreDisplay = document.getElementById("score");
 // Function to start the hearts game
 function startHearts() {
   // Define emojis to be used in the heart function
-  const emojis = ["❤️", "💥", "✨", "🎉", "💖", "🌟", "🌈", "💌", "💘"];
+  const emojis = ["❤️", "🐻", "✨", "👠", "💖", "🌟", "😻", "💌", "💘", "🦕", "🍓", "🍓", "🍓", "🍓"];
   
   // Sound for emoji click
-  const emojiClickSound = new Audio('emoji-click-sound.mp3');  // Replace with your actual sound file
+  const emojiClickSound = new Audio('sounds/pop.mp3');  // Replace with your actual sound file
 
   heartsInterval = setInterval(() => {
     // Randomly select an emoji
