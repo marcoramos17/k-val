@@ -8,11 +8,30 @@ let isEnvelopeOpened = false;
 const letterMessage = `
   Dear Kinza,
 
-  Words, words, words
+  Words could hardly express everything you mean to me. It has been quite the ride, we've had our ups and dows. But I hope you know, these were the best 6 months of my life.
+  With all the good and the bad, I wouldn't have it any other way. Because it was through the good that I learned to love you and through the bad that I learned to cherish you.
+  Sometimes it's scary, I really don't want to lose you, you are and have become my everything. Before I even noticed you became my best friend, my beloved girlfriend (and future wife), my princess, my love, my sweetheart.
+  Truth be told, I fear living in a world without you. I fear not being able to achieve everything we set out to do, our goals, our dream, our plans and our future together.
+  But it won't stop me, nothing will. I will fight for you, I will fight for us, I will fight for our love. I will fight for our future. From the very start, until the very end, I won't give up on you, I won't let you suffer alone, and I won't ever abandon you.
+  This much I can promise, and this much I will do. I love you, Kinza, with all my heart and soul. I love you more than anything in this world, and I will love you for all eternity.
+  With all that said and done,
 
   Will you be my Valentine?
 `;
 
+// Sentences in case of rejection
+const sentences = [
+  "Shush, don't be silly! Say yes!",
+  "Ugh, imagine hating me!",
+  "Seriously, what am I gonna do with you!",
+  "NO! Not allowed! 😠",
+  "Shhh baby, just be mine.",
+  "We are not leaving here until you say yes",
+  "Playing hard to get, huh?!",
+  "Meanie! 😡",
+  "This is who you're saying no to, by the way, if you even care: 😿",
+  "But my love for you is big! Big like dinosaur! 🐱‍🐉 rawr",
+];
 
 
 // Dynamically load Three.js and GSAP libraries
@@ -574,8 +593,14 @@ function triggerLoveLetter() {
   });
 }
 
+function playNoSound() {
+  const noSound = new Audio("sounds/sad-trombone.mp3");
+  noSound.play();
+}
+
 // Function to show the pop-up and add buttons dynamically
 function showPopUp() {
+  scoreDisplay.textContent = "Please say yes! 🥺";
   // Create the container for the love letter pop-up
   const loveLetterContainer = document.createElement('div');
   loveLetterContainer.id = 'loveLetterContainer';
@@ -594,7 +619,7 @@ function showPopUp() {
   yesButton.innerText = 'Yes';
   yesButton.classList.add('reply-btn');
   yesButton.addEventListener('click', () => {
-    //alert('You said Yes!');
+    scoreDisplay.textContent = "YAYYY!! ❤️";  // Update the score display
     triggerExplosionAndSound();  // Trigger the explosion and sound
     //closePopUp();  // Close the pop-up
   });
@@ -603,8 +628,8 @@ function showPopUp() {
   noButton.innerText = 'No';
   noButton.classList.add('reply-btn');
   noButton.addEventListener('click', () => {
-    alert('You said No!');  // Add further actions if needed
-    closePopUp();
+    playNoSound();  // Play a sad sound
+    scoreDisplay.textContent = getRandomSentence();
   });
 
   // Append buttons to the letter content
@@ -622,6 +647,7 @@ function showPopUp() {
     loveLetterContainer.style.display = 'none';
     document.body.removeChild(loveLetterContainer);  // Remove the pop-up from the DOM
   }
+  
 }
 
 
@@ -728,27 +754,10 @@ function triggerExplosionAndSound() {
 // Expose the function globally so it can be called from other scripts
 window.triggerLoveLetter = triggerLoveLetter;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function getRandomSentence() {
+  const randomIndex = Math.floor(Math.random() * sentences.length);
+  return sentences[randomIndex];
+}
 
 
 function createSceneryCanvas() {
