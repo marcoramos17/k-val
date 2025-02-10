@@ -601,11 +601,11 @@ function playNoSound() {
 // Function to show the pop-up and add buttons dynamically
 function showPopUp() {
   scoreDisplay.textContent = "Please say yes! 🥺";
-  enableScrolling();
+  
   // Create the container for the love letter pop-up
   const loveLetterContainer = document.createElement('div');
   loveLetterContainer.id = 'loveLetterContainer';
-  
+  enableScrolling();
   // Create the letter content (message and buttons)
   const letterContent = document.createElement('div');
   letterContent.classList.add('letter-content');
