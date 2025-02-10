@@ -35,6 +35,14 @@
   <script src="js/letter.js"></script>
   
   <script>
+    function disableScrolling() {
+      document.body.style.overflow = 'hidden';
+    }
+
+    function enableScrolling() {
+      document.body.style.overflow = 'auto';
+    }
+
     document.addEventListener('touchmove', function(event) {
       if (!event.target.closest('.loveLetter')) {
         event.preventDefault();
@@ -51,6 +59,10 @@
     document.getElementById('loveLetterContainer').addEventListener('touchmove', function(event) {
       event.stopPropagation();
     }, { passive: false });
+
+    
+    disableScrolling(); // Call disableScrolling() to lock scrolling
+    // Call enableScrolling() to unlock scrolling
   </script>
 </body>
 </html>
