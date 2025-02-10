@@ -93,8 +93,8 @@ function init3DEnvelope() {
   animateEnvelopeAppearance();
 
   // Enable mouse controls, handle window resize, etc.
-  //enableMouseControls();
-  enableTouchControls();
+  enableMouseControls();
+  //enableTouchControls();
   window.addEventListener('resize', onWindowResize, false);
 
   // Start the render loop
@@ -344,69 +344,17 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// Touch controls for rotating the envelope
-function enableTouchControls() {
-  let isTouching = false;
-  let previousTouchPosition = {
-    x: 0,
-    y: 0
-  };
-
-  renderer.domElement.addEventListener('touchstart', (event) => {
-    if (event.touches.length === 1) {
-      isTouching = true;
-      previousTouchPosition = {
-        x: event.touches[0].clientX,
-        y: event.touches[0].clientY
-      };
-    }
-  });
-
-  renderer.domElement.addEventListener('touchmove', (event) => {
-    if (!isTouching || event.touches.length !== 1) return;
-
-    const deltaMove = {
-      x: event.touches[0].clientX - previousTouchPosition.x,
-      y: event.touches[0].clientY - previousTouchPosition.y,
-    };
-
-    const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
-      new THREE.Euler(
-        toRadians(deltaMove.y * 0.5),
-        toRadians(deltaMove.x * 0.5),
-        0,
-        'XYZ'
-      )
-    );
-
-    envelope.quaternion.multiplyQuaternions(deltaRotationQuaternion, envelope.quaternion);
-
-    previousTouchPosition = {
-      x: event.touches[0].clientX,
-      y: event.touches[0].clientY
-    };
-  });
-
-  renderer.domElement.addEventListener('touchend', () => {
-    isTouching = false;
-  });
-}
-
-function toRadians(angle) {
-  return angle * (Math.PI / 180);
-}
-
-
-// Mouse controls for rotating the envelope
 function enableMouseControls() {
-  let isMouseDown = false;
+  let isInteracting = false;
+  let lastTouchX = 0, lastTouchY = 0;
 
-  renderer.domElement.addEventListener('mousedown', () => {
-    isMouseDown = true;
+  // Mouse Events
+  renderer.domElement.addEventListener('mousedown', (event) => {
+    isInteracting = true;
   });
 
   renderer.domElement.addEventListener('mousemove', (event) => {
-    if (!isMouseDown) return;
+    if (!isInteracting) return;
 
     const deltaMove = {
       x: event.movementX || event.mozMovementX || event.webkitMovementX || 0,
@@ -426,13 +374,61 @@ function enableMouseControls() {
   });
 
   renderer.domElement.addEventListener('mouseup', () => {
-    isMouseDown = false;
+    isInteracting = false;
   });
 
   renderer.domElement.addEventListener('mouseleave', () => {
-    isMouseDown = false;
+    isInteracting = false;
+  });
+
+  // Touch Events
+  renderer.domElement.addEventListener('touchstart', (event) => {
+    if (event.touches.length === 1) {
+      isInteracting = true;
+      lastTouchX = event.touches[0].clientX;
+      lastTouchY = event.touches[0].clientY;
+    }
+  });
+
+  renderer.domElement.addEventListener('touchmove', (event) => {
+    if (!isInteracting || event.touches.length !== 1) return;
+
+    const touch = event.touches[0];
+
+    const deltaMove = {
+      x: touch.clientX - lastTouchX,
+      y: touch.clientY - lastTouchY,
+    };
+
+    lastTouchX = touch.clientX;
+    lastTouchY = touch.clientY;
+
+    const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(
+        toRadians(deltaMove.y * 0.5),
+        toRadians(deltaMove.x * 0.5),
+        0,
+        'XYZ'
+      )
+    );
+
+    scene.quaternion.multiplyQuaternions(deltaRotationQuaternion, scene.quaternion);
+  });
+
+  renderer.domElement.addEventListener('touchend', () => {
+    isInteracting = false;
+  });
+
+  renderer.domElement.addEventListener('touchcancel', () => {
+    isInteracting = false;
   });
 }
+
+// Helper function to convert degrees to radians
+function toRadians(degrees) {
+  return degrees * (Math.PI / 180);
+}
+
 
 function toRadians(angle) {
   return angle * (Math.PI / 180);
