@@ -33,7 +33,18 @@
   <script src="js/hearts.js"></script>
   <script src="js/scratch.js"></script>
   <script src="js/puzzle.js"></script>
+  <script src="js/letter.js"></script>
   
-  <script src="js/letter.js"></script>  
+  <script>
+    document.addEventListener('touchmove', function(event) {
+      event.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchstart', function(event) {
+      if (event.target.tagName === 'IMG' || event.target.tagName === 'TEXT') {
+        event.preventDefault();
+      }
+    }, { passive: false });
+  </script>
 </body>
 </html>
