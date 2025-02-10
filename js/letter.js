@@ -93,7 +93,7 @@ function init3DEnvelope() {
   animateEnvelopeAppearance();
 
   // Enable mouse controls, handle window resize, etc.
-  enableMouseControls();
+  //enableMouseControls();
   enableTouchControls();
   window.addEventListener('resize', onWindowResize, false);
 
