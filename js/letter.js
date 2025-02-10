@@ -605,7 +605,7 @@ function showPopUp() {
   // Create the container for the love letter pop-up
   const loveLetterContainer = document.createElement('div');
   loveLetterContainer.id = 'loveLetterContainer';
-  enableScrolling();
+  
   // Create the letter content (message and buttons)
   const letterContent = document.createElement('div');
   letterContent.classList.add('letter-content');

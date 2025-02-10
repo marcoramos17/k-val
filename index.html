@@ -17,13 +17,6 @@
     <canvas id="scratchCanvas"></canvas>
   </div>
 
-  <div id="loveLetterContainer" style="display: none;">
-    <div class="loveLetter">
-      <p>Will you be my Valentine?</p>
-      <button id="yesButton">Yes</button>
-      <button id="noButton">No</button>
-    </div>
-  </div>
 
   <!-- Load the libraries before your script -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r141/three.min.js"></script>
@@ -33,36 +26,5 @@
   <script src="js/scratch.js"></script>
   <script src="js/puzzle.js"></script>
   <script src="js/letter.js"></script>
-  
-  <script>
-    function disableScrolling() {
-      document.body.style.overflow = 'hidden';
-    }
-
-    function enableScrolling() {
-      document.body.style.overflow = 'auto';
-    }
-
-    document.addEventListener('touchmove', function(event) {
-      if (!event.target.closest('.loveLetter')) {
-        event.preventDefault();
-      }
-    }, { passive: false });
-
-    document.addEventListener('touchstart', function(event) {
-      if (event.target.tagName === 'IMG' || event.target.tagName === 'TEXT') {
-        event.preventDefault();
-      }
-    }, { passive: false });
-
-    // Allow scrolling within the loveLetterContainer
-    document.getElementById('loveLetterContainer').addEventListener('touchmove', function(event) {
-      event.stopPropagation();
-    }, { passive: false });
-
-    
-    disableScrolling(); // Call disableScrolling() to lock scrolling
-    // Call enableScrolling() to unlock scrolling
-  </script>
 </body>
 </html>
