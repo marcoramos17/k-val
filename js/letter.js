@@ -50,6 +50,9 @@ function init3DEnvelope() {
     puzzleContainer.style.display = 'none';
   }
 
+  // Create the static 2D scenery canvas
+  createSceneryCanvas();
+
   // Create the scene, camera, and renderer (your existing code)
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -722,12 +725,134 @@ function triggerExplosionAndSound() {
   }, 2000);  // Remove after 1 second (when animation is complete)
 }
 
-
-
-
-
-
-
-
 // Expose the function globally so it can be called from other scripts
 window.triggerLoveLetter = triggerLoveLetter;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function createSceneryCanvas() {
+  const sceneryCanvas = document.createElement('canvas');
+  sceneryCanvas.width = window.innerWidth;
+  sceneryCanvas.height = window.innerHeight;
+  sceneryCanvas.style.position = 'fixed';
+  sceneryCanvas.style.top = '0';
+  sceneryCanvas.style.left = '0';
+  sceneryCanvas.style.zIndex = '1'; // Ensure it is behind the 3D canvas
+  document.body.appendChild(sceneryCanvas);
+
+  const ctx = sceneryCanvas.getContext('2d');
+
+  // Draw Grass (a bit higher)
+  ctx.fillStyle = '#6dbd45';  // Grass color
+  ctx.strokeStyle = '#4c9c2e'; // Cartoonish contour color
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(0, window.innerHeight - 300);
+  ctx.lineTo(window.innerWidth, window.innerHeight - 300);
+  ctx.lineTo(window.innerWidth, window.innerHeight);
+  ctx.lineTo(0, window.innerHeight);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();  // Add contour to the grass
+
+  // Draw Trees
+  drawTree(ctx, window.innerWidth / 4, window.innerHeight - 250); // Left tree
+  drawTree(ctx, window.innerWidth * 3 / 4, window.innerHeight - 250); // Right tree
+
+  // Draw Bench (a bit higher)
+  drawBench(ctx, window.innerWidth / 2 - 100, window.innerHeight - 290); // Centered bench
+}
+
+function drawTree(ctx, x, y) {
+  // Tree trunk (rounded)
+  ctx.fillStyle = '#8b4513';  // Brown color for trunk
+  ctx.strokeStyle = '#5d2f1b'; // Cartoonish contour color for trunk
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(x - 15, y - 60);
+  ctx.lineTo(x + 15, y - 60);
+  ctx.lineTo(x + 15, y);
+  ctx.lineTo(x - 15, y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Tree foliage (rounded circle with a contour)
+  ctx.beginPath();
+  ctx.arc(x, y - 90, 40, 0, Math.PI * 2);
+  ctx.fillStyle = '#228b22';  // Green color for foliage
+  ctx.strokeStyle = '#1e5d1a'; // Darker green contour
+  ctx.lineWidth = 5;
+  ctx.fill();
+  ctx.stroke();
+}
+
+function drawBench(ctx, x, y) {
+  // Bench legs (rectangles)
+  ctx.fillStyle = '#8b4513';  // Brown color for legs
+  ctx.strokeStyle = '#6a3f2a'; // Cartoonish contour color for legs
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.rect(x + 30, y - 20, 20, 80);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  
+  ctx.beginPath();
+  ctx.rect(x + 170, y - 20, 20, 80);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Bench seat (rounded edges)
+  ctx.fillStyle = '#deb887';  // Light brown color for the bench
+  ctx.strokeStyle = '#b08d57'; // Cartoonish contour color
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + 220, y);
+  ctx.lineTo(x + 220, y + 20);
+  ctx.lineTo(x, y + 20);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Bench backrest
+  ctx.beginPath();
+  ctx.moveTo(x, y - 80);
+  ctx.lineTo(x + 220, y - 80);
+  ctx.lineTo(x + 220, y - 20);
+  ctx.lineTo(x, y - 20);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Bench backrest details
+  ctx.beginPath();
+  ctx.moveTo(x, y - 40);
+  ctx.lineTo(x + 220, y - 40);
+  ctx.moveTo(x, y - 60);
+  ctx.lineTo(x + 220, y - 60);
+  ctx.stroke();
+}
