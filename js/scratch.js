@@ -1,5 +1,3 @@
-// scratch.js
-
 function setupScratchOverlay() {
   // Create the canvas element
   const scratchCanvas = document.createElement('canvas');
@@ -15,7 +13,7 @@ function setupScratchOverlay() {
   scratchCanvas.style.left = '0';
   scratchCanvas.style.width = '100vw';
   scratchCanvas.style.height = '100vh';
-  scratchCanvas.style.zIndex = '9999'; // Ensure it's on top
+  scratchCanvas.style.zIndex = '10002'; // Ensure it's on top
   scratchCanvas.style.cursor = 'crosshair';
 
   // Append the canvas to the body
@@ -173,8 +171,6 @@ function setupScratchOverlay() {
   scratchCanvas.addEventListener('touchend', endScratch);
   scratchCanvas.addEventListener('touchcancel', endScratch);
 }
-  
-  // Expose the function globally
-  window.setupScratchOverlay = setupScratchOverlay;
-  
 
+// Expose the function globally
+window.setupScratchOverlay = setupScratchOverlay;

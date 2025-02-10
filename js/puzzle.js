@@ -292,6 +292,7 @@ function checkPlacement(piece) {
       const sound = new Audio('sounds/claps.mp3'); // Replace with your sound file path
       sound.play();
       setTimeout(() => {
+        scoreDisplay.textContent = "Rotate and open the envelope!";
         triggerLoveLetter();  // Trigger the love letter animation or action
       }, 3000);
     }

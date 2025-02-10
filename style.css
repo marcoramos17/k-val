@@ -19,14 +19,32 @@
     height: 100vh;
   }
   
-  /* Score display */
   #score {
     position: fixed;
-    top: 10px;
-    left: 10px;
-    font-size: 2rem;
-    color: #fff;
-    z-index: 10;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    color: #ff69b4; /* Hot pink color */
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    text-shadow: 2px 2px 4px #000000; /* Black shadow */
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid #ff69b4; /* Hot pink border */
+    z-index: 10001; /* Ensure it is above other elements */
+    animation: float 3s ease-in-out infinite;
+    pointer-events: none; /* Make it click-through */
+    text-align: center; /* Center the text */
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translate(-50%, 0);
+    }
+    50% {
+      transform: translate(-50%, -10px);
+    }
   }
   
   /* Floating heart */
@@ -334,4 +352,14 @@
 
 * {
   user-select: none;  /* Disable text selection on all elements */
+}
+
+#scratchCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10002; /* Ensure it's above the score */
+  cursor: crosshair;
 }

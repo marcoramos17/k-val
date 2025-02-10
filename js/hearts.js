@@ -13,6 +13,11 @@ function startHearts() {
   // Sound for emoji click
   const emojiClickSound = new Audio('sounds/pop.mp3');  // Replace with your actual sound file
 
+  function playClickSound() {
+    const soundClone = emojiClickSound.cloneNode();
+    soundClone.play();
+  }
+
   heartsInterval = setInterval(() => {
     // Randomly select an emoji
     const emoji = emojis[Math.floor(Math.random() * emojis.length)];
@@ -30,7 +35,7 @@ function startHearts() {
     emojiElement.addEventListener("click", () => {
       score++;
       scoreDisplay.textContent = `Score: ${score}`;
-      emojiClickSound.play();  // Play the sound when clicked
+      playClickSound();  // Play the sound when clicked
       emojiElement.remove();
       
       if (score >= scoreThreshold) {
@@ -49,7 +54,7 @@ function startHearts() {
 
 // Start the scratch card game
 function triggerScratchCard() {
-  scoreDisplay.textContent = "";
+  scoreDisplay.textContent = "Will you sit them together?";
   setupScratchOverlay();
   startPuzzle();
 }
