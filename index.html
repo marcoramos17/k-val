@@ -37,7 +37,9 @@
   
   <script>
     document.addEventListener('touchmove', function(event) {
-      event.preventDefault();
+      if (!event.target.closest('.loveLetter')) {
+        event.preventDefault();
+      }
     }, { passive: false });
 
     document.addEventListener('touchstart', function(event) {
