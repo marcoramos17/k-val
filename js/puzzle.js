@@ -256,6 +256,11 @@ function makeDraggable(element) {
   });
 }
 
+const imageDimensions = {
+  width: 80,
+  height: 'auto' // Maintain aspect ratio
+};
+
 const idealPositions = {
   kcat: { x: window.innerWidth / 2 - 70, y: window.innerHeight / 2 - 113 },
   mcat: { x: window.innerWidth / 2 + 3, y: window.innerHeight / 2 - 100 },

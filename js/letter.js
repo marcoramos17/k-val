@@ -8,7 +8,7 @@ let isEnvelopeOpened = false;
 const letterMessage = `
   Dear Kinza,
 
-  I would like to apologize for every 
+  Words, words, words
 
   Will you be my Valentine?
 `;
@@ -782,6 +782,23 @@ function createSceneryCanvas() {
 
   // Draw Bench (a bit higher)
   drawBench(ctx, window.innerWidth / 2 - 100, window.innerHeight - 290); // Centered bench
+
+  // Load and draw cat images
+  const kcat = new Image();
+  kcat.src = './img/kcat.png';
+  kcat.onload = () => {
+    const aspectRatio = kcat.width / kcat.height;
+    const height = imageDimensions.width / aspectRatio;
+    ctx.drawImage(kcat, idealPositions.kcat.x, idealPositions.kcat.y, imageDimensions.width, height);
+  };
+
+  const mcat = new Image();
+  mcat.src = './img/mcat.png';
+  mcat.onload = () => {
+    const aspectRatio = mcat.width / mcat.height;
+    const height = imageDimensions.width / aspectRatio;
+    ctx.drawImage(mcat, idealPositions.mcat.x, idealPositions.mcat.y, imageDimensions.width, height);
+  };
 }
 
 function drawTree(ctx, x, y) {
