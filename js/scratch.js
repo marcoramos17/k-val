@@ -30,12 +30,12 @@ function setupScratchOverlay() {
   
     // Draw the scratchable overlay
     function drawOverlay() {
-      ctx.fillStyle = '#B0B0B0'; // Gray overlay color
+      ctx.fillStyle = '#e6325c'; // Pink overlay color
       ctx.fillRect(0, 0, scratchCanvas.width, scratchCanvas.height);
   
       // Add text if desired
       ctx.font = 'bold 48px Arial';
-      ctx.fillStyle = '#888';
+      ctx.fillStyle = '#ff9a9e';
       ctx.textAlign = 'center';
       ctx.fillText('Scratch here!', scratchCanvas.width / 2, scratchCanvas.height / 2);
   
