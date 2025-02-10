@@ -74,7 +74,7 @@ function init3DEnvelope() {
 
   // Create the scene, camera, and renderer (your existing code)
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   camera.position.z = 5;
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -93,7 +93,7 @@ function init3DEnvelope() {
   animateEnvelopeAppearance();
 
   // Enable mouse controls, handle window resize, etc.
-  //enableMouseControls();
+  enableMouseControls();
   enableTouchControls();
   window.addEventListener('resize', onWindowResize, false);
 
@@ -391,6 +391,11 @@ function enableTouchControls() {
     isTouching = false;
   });
 }
+
+function toRadians(angle) {
+  return angle * (Math.PI / 180);
+}
+
 
 // Mouse controls for rotating the envelope
 function enableMouseControls() {
