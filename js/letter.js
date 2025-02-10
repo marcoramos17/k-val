@@ -343,20 +343,37 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// Mouse controls for rotating the envelope
+// Handle window resize
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// Mouse and touch controls for rotating the envelope
 function enableMouseControls() {
   let isMouseDown = false;
+  let isTouching = false;
+  let previousMousePosition = {
+    x: 0,
+    y: 0
+  };
 
-  renderer.domElement.addEventListener('mousedown', () => {
+  // Mouse events
+  renderer.domElement.addEventListener('mousedown', (event) => {
     isMouseDown = true;
+    previousMousePosition = {
+      x: event.clientX,
+      y: event.clientY
+    };
   });
 
   renderer.domElement.addEventListener('mousemove', (event) => {
     if (!isMouseDown) return;
 
     const deltaMove = {
-      x: event.movementX || event.mozMovementX || event.webkitMovementX || 0,
-      y: event.movementY || event.mozMovementY || event.webkitMovementY || 0,
+      x: event.clientX - previousMousePosition.x,
+      y: event.clientY - previousMousePosition.y,
     };
 
     const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
@@ -368,7 +385,12 @@ function enableMouseControls() {
       )
     );
 
-    scene.quaternion.multiplyQuaternions(deltaRotationQuaternion, scene.quaternion);
+    envelope.quaternion.multiplyQuaternions(deltaRotationQuaternion, envelope.quaternion);
+
+    previousMousePosition = {
+      x: event.clientX,
+      y: event.clientY
+    };
   });
 
   renderer.domElement.addEventListener('mouseup', () => {
@@ -377,6 +399,46 @@ function enableMouseControls() {
 
   renderer.domElement.addEventListener('mouseleave', () => {
     isMouseDown = false;
+  });
+
+  // Touch events
+  renderer.domElement.addEventListener('touchstart', (event) => {
+    if (event.touches.length === 1) {
+      isTouching = true;
+      previousMousePosition = {
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY
+      };
+    }
+  });
+
+  renderer.domElement.addEventListener('touchmove', (event) => {
+    if (!isTouching || event.touches.length !== 1) return;
+
+    const deltaMove = {
+      x: event.touches[0].clientX - previousMousePosition.x,
+      y: event.touches[0].clientY - previousMousePosition.y,
+    };
+
+    const deltaRotationQuaternion = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(
+        toRadians(deltaMove.y * 0.5),
+        toRadians(deltaMove.x * 0.5),
+        0,
+        'XYZ'
+      )
+    );
+
+    envelope.quaternion.multiplyQuaternions(deltaRotationQuaternion, envelope.quaternion);
+
+    previousMousePosition = {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY
+    };
+  });
+
+  renderer.domElement.addEventListener('touchend', () => {
+    isTouching = false;
   });
 }
 
