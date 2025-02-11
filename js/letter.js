@@ -157,7 +157,7 @@ function createEnvelope() {
   flapGeometry.translate(0, 0, 0);
 
   flap = new THREE.Mesh(flapGeometry, flapMaterial);
-  
+
   // Position the flap
   flap.position.y = 0.0;
   flap.position.z = 0.01;
@@ -480,6 +480,7 @@ function onDocumentMouseClick(event) {
     if (intersectedObject.name === "seal" || intersectedObject.name === "flap") {
         console.log("Seal or Flap clicked!");
         openEnvelope();
+        console.log("Envelope opened!");
         // Trigger the pop-up after some delay (you can adjust this timing)
         setTimeout(() => {
           showPopUp();
@@ -651,7 +652,6 @@ function playNoSound() {
 // Function to show the pop-up and add buttons dynamically
 function showPopUp() {
   scoreDisplay.textContent = "Please say yes! 🥺";
-  enableScrolling();
   // Create the container for the love letter pop-up
   const loveLetterContainer = document.createElement('div');
   loveLetterContainer.id = 'loveLetterContainer';

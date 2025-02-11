@@ -261,9 +261,12 @@ const imageDimensions = {
   height: 'auto' // Maintain aspect ratio
 };
 
+const benchX = window.innerWidth / 2 - 100;
+const benchY = window.innerHeight - 290;
+
 const idealPositions = {
-  kcat: { x: window.innerWidth / 2 - 70, y: window.innerHeight / 2 - 113 },
-  mcat: { x: window.innerWidth / 2 + 3, y: window.innerHeight / 2 - 100 },
+  kcat: { x: benchX + 30, y: benchY - 113 }, // Adjusted relative to the bench
+  mcat: { x: benchX + 103, y: benchY - 100 }, // Adjusted relative to the bench
 };
 
 function checkPlacement(piece) {
