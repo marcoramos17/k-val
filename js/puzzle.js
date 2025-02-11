@@ -44,10 +44,10 @@ function drawScenery() {
   // Draw Grass (a bit higher)
   ctx.fillStyle = '#6dbd45';  // Grass color
   ctx.strokeStyle = '#4c9c2e'; // Cartoonish contour color
-  ctx.lineWidth = 5;
+  ctx.lineWidth = window.innerWidth * 0.005;
   ctx.beginPath();
-  ctx.moveTo(0, window.innerHeight - 300);
-  ctx.lineTo(window.innerWidth, window.innerHeight - 300);
+  ctx.moveTo(0, window.innerHeight * 0.7);
+  ctx.lineTo(window.innerWidth, window.innerHeight * 0.7);
   ctx.lineTo(window.innerWidth, window.innerHeight);
   ctx.lineTo(0, window.innerHeight);
   ctx.closePath();
@@ -55,87 +55,64 @@ function drawScenery() {
   ctx.stroke();  // Add contour to the grass
 
   // Draw Trees
-  drawTree(ctx, window.innerWidth / 4, window.innerHeight - 250); // Left tree
-  drawTree(ctx, window.innerWidth * 3 / 4, window.innerHeight - 250); // Right tree
-  
+  drawTree(ctx, window.innerWidth * 0.25, window.innerHeight * 0.75); // Left tree
+  drawTree(ctx, window.innerWidth * 0.75, window.innerHeight * 0.75); // Right tree
+
   // Draw Bench (a bit higher)
-  drawBench(ctx, window.innerWidth / 2 - 100, window.innerHeight - 290); // Centered bench
-  
+  drawBench(ctx, window.innerWidth * 0.5, window.innerHeight * 0.71); // Centered bench
+
   puzzleContainer.appendChild(sceneryCanvas); // Add scenery to puzzle container
 }
 
 function drawTree(ctx, x, y) {
+  const trunkWidth = window.innerWidth * 0.015;
+  const trunkHeight = window.innerHeight * 0.06;
+  const foliageRadius = window.innerWidth * 0.04;
+
   // Tree trunk (rounded)
   ctx.fillStyle = '#8b4513';  // Brown color for trunk
   ctx.strokeStyle = '#5d2f1b'; // Cartoonish contour color for trunk
-  ctx.lineWidth = 5;
+  ctx.lineWidth = window.innerWidth * 0.005;
   ctx.beginPath();
-  ctx.moveTo(x - 15, y - 60);
-  ctx.lineTo(x + 15, y - 60);
-  ctx.lineTo(x + 15, y);
-  ctx.lineTo(x - 15, y);
+  ctx.moveTo(x - trunkWidth, y - trunkHeight);
+  ctx.lineTo(x + trunkWidth, y - trunkHeight);
+  ctx.lineTo(x + trunkWidth, y);
+  ctx.lineTo(x - trunkWidth, y);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
 
-  // Tree foliage (rounded circle with a contour)
+  // Tree foliage (rounded)
+  ctx.fillStyle = '#228B22';  // Green color for foliage
+  ctx.strokeStyle = '#006400'; // Cartoonish contour color for foliage
+  ctx.lineWidth = window.innerWidth * 0.005;
   ctx.beginPath();
-  ctx.arc(x, y - 90, 40, 0, Math.PI * 2);
-  ctx.fillStyle = '#228b22';  // Green color for foliage
-  ctx.strokeStyle = '#1e5d1a'; // Darker green contour
-  ctx.lineWidth = 5;
+  ctx.arc(x, y - trunkHeight - foliageRadius, foliageRadius, 0, Math.PI * 2, true);
+  ctx.closePath();
   ctx.fill();
   ctx.stroke();
 }
 
-function drawBench(ctx, x, y) {
-  // Bench legs (rectangles)
-  ctx.fillStyle = '#8b4513';  // Brown color for legs
-  ctx.strokeStyle = '#6a3f2a'; // Cartoonish contour color for legs
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.rect(x + 30, y - 20, 20, 80);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-  
-  ctx.beginPath();
-  ctx.rect(x + 170, y - 20, 20, 80);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+function drawBench(ctx, canvasWidth, canvasHeight) {
+  const benchWidth = 200; // Adjust width as needed
+  const benchHeight = 50;
+  const legWidth = 20;
+  const legHeight = 30;
 
-  // Bench seat (rounded edges)
-  ctx.fillStyle = '#deb887';  // Light brown color for the bench
-  ctx.strokeStyle = '#b08d57'; // Cartoonish contour color
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(x + 220, y);
-  ctx.lineTo(x + 220, y + 20);
-  ctx.lineTo(x, y + 20);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+  // Center X: Adjust so the *middle* of the bench is aligned
+  const x = (canvasWidth / 2) - (benchWidth / 2);
+  const y = (canvasHeight / 2) + 50; // Adjust Y as needed
 
-  // Bench backrest
-  ctx.beginPath();
-  ctx.moveTo(x, y - 80);
-  ctx.lineTo(x + 220, y - 80);
-  ctx.lineTo(x + 220, y - 20);
-  ctx.lineTo(x, y - 20);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+  // Bench seat
+  ctx.fillStyle = '#8B4513'; // Brown color
+  ctx.fillRect(x, y, benchWidth, benchHeight);
 
-  // Bench backrest details
-  ctx.beginPath();
-  ctx.moveTo(x, y - 40);
-  ctx.lineTo(x + 220, y - 40);
-  ctx.moveTo(x, y - 60);
-  ctx.lineTo(x + 220, y - 60);
-  ctx.stroke();
+  // Bench legs
+  ctx.fillStyle = '#654321'; // Darker brown
+  ctx.fillRect(x + 10, y + benchHeight, legWidth, legHeight); // Left leg
+  ctx.fillRect(x + benchWidth - 30, y + benchHeight, legWidth, legHeight); // Right leg
 }
+
 
 
 function createPuzzlePiece(src, id) {
