@@ -71,12 +71,12 @@ function drawSharedScenery(ctx, width, height) {
 
   // 2) Draw trees
   //    Using your scaling formula for variety, or just a constant scale
-  const treeScale = Math.log((width * height) / 200000 + 1) * 0.8;
+  const treeScale = Math.max(Math.log((width * height) / 200000 + 1) * 0.8, 0.5);
   drawTree(ctx, width * 0.2, height * 0.75, treeScale); // Left tree
   drawTree(ctx, width * 0.8, height * 0.75, treeScale); // Right tree
 
   // 3) Draw bench
-  const benchScale = Math.log((width * height) / 200000 + 1) * 0.5;
+  const benchScale = Math.max(Math.log((width * height) / 200000 + 1) * 0.5, 0.3);
   drawBench(ctx, width * 0.5, height * 0.71, benchScale); // Centered bench
 }
 
