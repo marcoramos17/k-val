@@ -5,9 +5,15 @@
     box-sizing: border-box;
   }
   
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+  }
+
   /* Body styles */
   body {
-    font-family: Arial, sans-serif;
+    font-family: 'Tangerine', cursive, sans-serif;
     background: linear-gradient(135deg, #ff9a9e, #fad0c4);
     overflow: hidden;
     touch-action: none;
@@ -27,7 +33,7 @@
     transform: translateX(-50%);
     font-size: 24px;
     color: #ff69b4; /* Hot pink color */
-    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-family: 'Delius', cursive, sans-serif;
     text-shadow: 2px 2px 4px #000000; /* Black shadow */
     background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
     padding: 10px 20px;
@@ -260,7 +266,6 @@
 .letter-content {
   padding: 20px;
   text-align: center;
-  font-family: 'Georgia', serif;
   color: #333;
   line-height: 1.5;
   background-color: #f4e1c1;  /* Light tan color for aged paper */
@@ -276,13 +281,13 @@
 .letter-content p {
   margin-bottom: 20px;
   color: #333;
-  font-size: 1rem;
-  font-family: 'Great Vibes', cursive;
+  font-size: 2rem;
   line-height: 1.5;
 }
 
 
 .letter-content button {
+  font-family: 'Chewy', cursive, sans-serif;
   margin: 5px;
   padding: 10px 20px;
   background-color: #ff3d68;
