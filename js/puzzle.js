@@ -93,25 +93,45 @@ function drawTree(ctx, x, y) {
   ctx.stroke();
 }
 
-function drawBench(ctx, canvasWidth, canvasHeight) {
-  const benchWidth = 200; // Adjust width as needed
-  const benchHeight = 50;
-  const legWidth = 20;
-  const legHeight = 30;
+function drawBench(ctx, centerX, y) {
+  const benchWidth = window.innerWidth * 0.2;
+  const benchHeight = window.innerHeight * 0.02;
+  const legWidth = window.innerWidth * 0.01;
+  const legHeight = window.innerHeight * 0.18;
+  const backrestHeight = window.innerHeight * 0.08;
+  const plankHeight = backrestHeight / 3;
+  const backrestOffset = window.innerHeight * 0.015; // Moves backrest higher
+  const legOffset = window.innerHeight * 0.12; // Moves legs higher
+  const x = centerX - (benchWidth / 2);
 
-  // Center X: Adjust so the *middle* of the bench is aligned
-  const x = (canvasWidth / 2) - (benchWidth / 2);
-  const y = (canvasHeight / 2) + 50; // Adjust Y as needed
+  ctx.lineWidth = window.innerWidth * 0.005;
+
+  // Bench legs (moved higher)
+  ctx.fillStyle = '#8b4513';
+  ctx.strokeStyle = '#5d2f1b';
+  ctx.fillRect(x + (benchWidth * 0.05), y + benchHeight - legOffset, legWidth, legHeight);
+  ctx.strokeRect(x + (benchWidth * 0.05), y + benchHeight - legOffset, legWidth, legHeight);
+  ctx.fillRect(x + (benchWidth * 0.9), y + benchHeight - legOffset, legWidth, legHeight);
+  ctx.strokeRect(x + (benchWidth * 0.9), y + benchHeight - legOffset, legWidth, legHeight);
 
   // Bench seat
-  ctx.fillStyle = '#8B4513'; // Brown color
+  ctx.fillStyle = '#d2b48c';
+  ctx.strokeStyle = '#a0522d';
   ctx.fillRect(x, y, benchWidth, benchHeight);
+  ctx.strokeRect(x, y, benchWidth, benchHeight);
 
-  // Bench legs
-  ctx.fillStyle = '#654321'; // Darker brown
-  ctx.fillRect(x + 10, y + benchHeight, legWidth, legHeight); // Left leg
-  ctx.fillRect(x + benchWidth - 30, y + benchHeight, legWidth, legHeight); // Right leg
+  // Bench backrest (3 planks, slightly higher)
+  for (let i = 0; i < 3; i++) {
+    const plankY = y - backrestHeight - backrestOffset + (i * plankHeight);
+    ctx.fillStyle = '#d2b48c';
+    ctx.strokeStyle = '#a0522d';
+    ctx.fillRect(x, plankY, benchWidth, plankHeight);
+    ctx.strokeRect(x, plankY, benchWidth, plankHeight);
+  }
 }
+
+
+
 
 
 
