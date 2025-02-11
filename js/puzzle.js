@@ -30,39 +30,57 @@ function startPuzzle() {
   puzzleContainer.appendChild(mcat);
 
   // Keep the background scenery (grass, trees, bench) visible even after the puzzle is complete
-  drawScenery();
+  createPuzzleSceneryCanvas();
 }
 
 
 
-function drawScenery() {
+function createPuzzleSceneryCanvas() {
+  // Create a canvas and append it to the puzzle container
   const sceneryCanvas = document.createElement('canvas');
   sceneryCanvas.width = window.innerWidth;
   sceneryCanvas.height = window.innerHeight;
+
+  // If you have a "puzzleContainer" DOM element:
+  puzzleContainer.appendChild(sceneryCanvas);
+
   const ctx = sceneryCanvas.getContext('2d');
-  
-  // Draw Grass (a bit higher)
+
+  // Use the shared function to draw the scenery
+  drawSharedScenery(ctx, sceneryCanvas.width, sceneryCanvas.height);
+
+  // If you need additional puzzle-specific drawings, do them here
+  // e.g., puzzle pieces or something else
+}
+
+
+// A single function to draw the shared scenery on any 2D canvas context.
+function drawSharedScenery(ctx, width, height) {
+  // 1) Draw grass
   ctx.fillStyle = '#6dbd45';  // Grass color
   ctx.strokeStyle = '#4c9c2e'; // Cartoonish contour color
-  ctx.lineWidth = window.innerWidth * 0.005;
+  ctx.lineWidth = width * 0.005;
   ctx.beginPath();
-  ctx.moveTo(0, window.innerHeight * 0.7);
-  ctx.lineTo(window.innerWidth, window.innerHeight * 0.7);
-  ctx.lineTo(window.innerWidth, window.innerHeight);
-  ctx.lineTo(0, window.innerHeight);
+  ctx.moveTo(0, height * 0.7);
+  ctx.lineTo(width, height * 0.7);
+  ctx.lineTo(width, height);
+  ctx.lineTo(0, height);
   ctx.closePath();
   ctx.fill();
-  ctx.stroke();  // Add contour to the grass
+  ctx.stroke();
 
-  // Draw Trees
-  drawTree(ctx, window.innerWidth * 0.25, window.innerHeight * 0.75, ((window.innerHeight * window.innerWidth)/200000) * 0.9); // Left tree
-  drawTree(ctx, window.innerWidth * 0.75, window.innerHeight * 0.75, ((window.innerHeight * window.innerWidth)/200000) * 0.9); // Right tree
+  // 2) Draw trees
+  //    Using your scaling formula for variety, or just a constant scale
+  const treeScale = ((width * height) / 200000) * 0.9;
+  drawTree(ctx, width * 0.2, height * 0.75, treeScale); // Left tree
+  drawTree(ctx, width * 0.8, height * 0.75, treeScale); // Right tree
 
-  // Draw Bench (a bit higher)
-  drawBench(ctx, window.innerWidth * 0.5, window.innerHeight * 0.71, ((window.innerHeight * window.innerWidth)/200000) * 0.5); // Centered bench
-
-  puzzleContainer.appendChild(sceneryCanvas); // Add scenery to puzzle container
+  // 3) Draw bench
+  const benchScale = ((width * height) / 200000) * 0.5;
+  drawBench(ctx, width * 0.5, height * 0.71, benchScale); // Centered bench
 }
+
+
 
 function drawBench(ctx, centerX, y, scale) {
   scale = scale || 1;

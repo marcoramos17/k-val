@@ -70,12 +70,13 @@ function init3DEnvelope() {
   }
 
   // Create the static 2D scenery canvas
-  createSceneryCanvas();
+  createThreeSceneryCanvas();
+  //createSceneryCanvas();
 
   // Create the scene, camera, and renderer (your existing code)
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.z = 5;
+  camera.position.z = 3;
 
   renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -105,7 +106,7 @@ function init3DEnvelope() {
 
 // Create the 3D envelope with correctly oriented flap
 function createEnvelope() {
-  drawScenery();  // Draw the background scenery
+  createPuzzleSceneryCanvas();  // Draw the background scenery
   // Create a group for the entire envelope
   const envelopeGroup = new THREE.Group();
 
@@ -811,37 +812,23 @@ function getRandomSentence() {
 }
 
 
-function createSceneryCanvas() {
+function createThreeSceneryCanvas() {
+  // Create a canvas that sits behind the 3D canvas
   const sceneryCanvas = document.createElement('canvas');
   sceneryCanvas.width = window.innerWidth;
   sceneryCanvas.height = window.innerHeight;
   sceneryCanvas.style.position = 'fixed';
   sceneryCanvas.style.top = '0';
   sceneryCanvas.style.left = '0';
-  sceneryCanvas.style.zIndex = '1'; // Ensure it is behind the 3D canvas
+  sceneryCanvas.style.zIndex = '1'; // Ensure it's behind the 3D canvas
+
   document.body.appendChild(sceneryCanvas);
 
   const ctx = sceneryCanvas.getContext('2d');
 
-  // Draw Grass (a bit higher)
-  ctx.fillStyle = '#6dbd45';  // Grass color
-  ctx.strokeStyle = '#4c9c2e'; // Cartoonish contour color
-  ctx.lineWidth = window.innerWidth * 0.005;
-  ctx.beginPath();
-  ctx.moveTo(0, window.innerHeight * 0.7);
-  ctx.lineTo(window.innerWidth, window.innerHeight * 0.7);
-  ctx.lineTo(window.innerWidth, window.innerHeight);
-  ctx.lineTo(0, window.innerHeight);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();  // Add contour to the grass
+  // Use the shared function to draw the scenery
+  drawSharedScenery(ctx, sceneryCanvas.width, sceneryCanvas.height);
 
-  // Draw Trees
-  drawTree(ctx, window.innerWidth * 0.25, window.innerHeight * 0.75); // Left tree
-  drawTree(ctx, window.innerWidth * 0.75, window.innerHeight * 0.75); // Right tree
-
-  // Draw Bench (a bit higher)
-  drawBench(ctx, window.innerWidth * 0.5, window.innerHeight * 0.71); // Centered bench
 
   // Load and draw cat images
   const kcat = new Image();
@@ -858,5 +845,5 @@ function createSceneryCanvas() {
     const aspectRatio = mcat.width / mcat.height;
     const height = imageDimensions.width / aspectRatio;
     ctx.drawImage(mcat, idealPositions.mcat.x, idealPositions.mcat.y, imageDimensions.width, height);
-  };
+  }
 }
