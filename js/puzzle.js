@@ -55,80 +55,110 @@ function drawScenery() {
   ctx.stroke();  // Add contour to the grass
 
   // Draw Trees
-  drawTree(ctx, window.innerWidth * 0.25, window.innerHeight * 0.75); // Left tree
-  drawTree(ctx, window.innerWidth * 0.75, window.innerHeight * 0.75); // Right tree
+  drawTree(ctx, window.innerWidth * 0.25, window.innerHeight * 0.75, ((window.innerHeight * window.innerWidth)/200000) * 0.9); // Left tree
+  drawTree(ctx, window.innerWidth * 0.75, window.innerHeight * 0.75, ((window.innerHeight * window.innerWidth)/200000) * 0.9); // Right tree
 
   // Draw Bench (a bit higher)
-  drawBench(ctx, window.innerWidth * 0.5, window.innerHeight * 0.71); // Centered bench
+  drawBench(ctx, window.innerWidth * 0.5, window.innerHeight * 0.71, ((window.innerHeight * window.innerWidth)/200000) * 0.5); // Centered bench
 
   puzzleContainer.appendChild(sceneryCanvas); // Add scenery to puzzle container
 }
 
-function drawTree(ctx, x, y) {
-  const trunkWidth = window.innerWidth * 0.015;
-  const trunkHeight = window.innerHeight * 0.06;
-  const foliageRadius = window.innerWidth * 0.04;
-
-  // Tree trunk (rounded)
-  ctx.fillStyle = '#8b4513';  // Brown color for trunk
-  ctx.strokeStyle = '#5d2f1b'; // Cartoonish contour color for trunk
-  ctx.lineWidth = window.innerWidth * 0.005;
-  ctx.beginPath();
-  ctx.moveTo(x - trunkWidth, y - trunkHeight);
-  ctx.lineTo(x + trunkWidth, y - trunkHeight);
-  ctx.lineTo(x + trunkWidth, y);
-  ctx.lineTo(x - trunkWidth, y);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
-
-  // Tree foliage (rounded)
-  ctx.fillStyle = '#228B22';  // Green color for foliage
-  ctx.strokeStyle = '#006400'; // Cartoonish contour color for foliage
-  ctx.lineWidth = window.innerWidth * 0.005;
-  ctx.beginPath();
-  ctx.arc(x, y - trunkHeight - foliageRadius, foliageRadius, 0, Math.PI * 2, true);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+function drawTree(ctx, x, y, scale) {
+  // Use scale factor, defaulting to 1 if not provided
+  scale = scale || 1;
+  
+  // Define dimensions based on window size and scale
+  const trunkWidth = window.innerWidth * 0.015 * scale;
+  const trunkHeight = window.innerHeight * 0.06 * scale;
+  const foliageRectHeight = window.innerHeight * 0.025 * scale;
+  
+  // Foliage widths are proportional to trunk width
+  const bottomFoliageWidth = trunkWidth * 3;
+  const middleFoliageWidth = trunkWidth * 2.5;
+  const topFoliageWidth = trunkWidth * 2;
+  
+  // Line width for contours, scaled
+  const lineW = window.innerWidth * 0.005 * scale;
+  ctx.lineWidth = lineW;
+  
+  // ---------------------------
+  // 1) Draw the trunk
+  // ---------------------------
+  // Center the trunk at (x), bottom at y
+  const trunkX = x - trunkWidth / 2;
+  const trunkY = y - trunkHeight;
+  ctx.fillStyle = '#8b4513';   // Brown for trunk
+  ctx.strokeStyle = '#5d2f1b'; // Darker brown outline
+  ctx.fillRect(trunkX, trunkY, trunkWidth, trunkHeight);
+  ctx.strokeRect(trunkX, trunkY, trunkWidth, trunkHeight);
+  
+  // ---------------------------
+  // 2) Draw the foliage using 3 stacked rectangles
+  // ---------------------------
+  // Bottom rectangle
+  const bottomFoliageX = x - bottomFoliageWidth / 2;
+  const bottomFoliageY = trunkY - foliageRectHeight;
+  ctx.fillStyle = '#228B22';   // Green foliage
+  ctx.strokeStyle = '#006400'; // Dark green outline
+  ctx.fillRect(bottomFoliageX, bottomFoliageY, bottomFoliageWidth, foliageRectHeight);
+  ctx.strokeRect(bottomFoliageX, bottomFoliageY, bottomFoliageWidth, foliageRectHeight);
+  
+  // Middle rectangle
+  const middleFoliageX = x - middleFoliageWidth / 2;
+  const middleFoliageY = bottomFoliageY - foliageRectHeight;
+  ctx.fillRect(middleFoliageX, middleFoliageY, middleFoliageWidth, foliageRectHeight);
+  ctx.strokeRect(middleFoliageX, middleFoliageY, middleFoliageWidth, foliageRectHeight);
+  
+  // Top rectangle
+  const topFoliageX = x - topFoliageWidth / 2;
+  const topFoliageY = middleFoliageY - foliageRectHeight;
+  ctx.fillRect(topFoliageX, topFoliageY, topFoliageWidth, foliageRectHeight);
+  ctx.strokeRect(topFoliageX, topFoliageY, topFoliageWidth, foliageRectHeight);
 }
 
-function drawBench(ctx, centerX, y) {
-  const benchWidth = window.innerWidth * 0.2;
-  const benchHeight = window.innerHeight * 0.02;
-  const legWidth = window.innerWidth * 0.01;
-  const legHeight = window.innerHeight * 0.18;
-  const backrestHeight = window.innerHeight * 0.08;
+
+
+function drawBench(ctx, centerX, y, scale) {
+  // Set default scale to 1 if not provided
+  scale = scale || 1;
+  
+  const benchWidth = window.innerWidth * 0.2 * scale;
+  const benchHeight = window.innerHeight * 0.02 * scale;
+  const legWidth = window.innerWidth * 0.01 * scale;
+  const legHeight = window.innerHeight * 0.18 * scale;
+  const backrestHeight = window.innerHeight * 0.08 * scale;
   const plankHeight = backrestHeight / 3;
-  const backrestOffset = window.innerHeight * 0.015; // Moves backrest higher
-  const legOffset = window.innerHeight * 0.12; // Moves legs higher
-  const x = centerX - (benchWidth / 2);
-
-  ctx.lineWidth = window.innerWidth * 0.005;
-
+  const backrestOffset = window.innerHeight * 0.015 * scale; // Moves backrest higher
+  const legOffset = window.innerHeight * 0.12 * scale;       // Moves legs higher
+  const x = centerX - benchWidth / 2;
+  
+  ctx.lineWidth = window.innerWidth * 0.005 * scale;
+  
   // Bench legs (moved higher)
   ctx.fillStyle = '#8b4513';
   ctx.strokeStyle = '#5d2f1b';
-  ctx.fillRect(x + (benchWidth * 0.05), y + benchHeight - legOffset, legWidth, legHeight);
-  ctx.strokeRect(x + (benchWidth * 0.05), y + benchHeight - legOffset, legWidth, legHeight);
-  ctx.fillRect(x + (benchWidth * 0.9), y + benchHeight - legOffset, legWidth, legHeight);
-  ctx.strokeRect(x + (benchWidth * 0.9), y + benchHeight - legOffset, legWidth, legHeight);
-
+  ctx.fillRect(x + benchWidth * 0.05, y + benchHeight - legOffset, legWidth, legHeight);
+  ctx.strokeRect(x + benchWidth * 0.05, y + benchHeight - legOffset, legWidth, legHeight);
+  ctx.fillRect(x + benchWidth * 0.9, y + benchHeight - legOffset, legWidth, legHeight);
+  ctx.strokeRect(x + benchWidth * 0.9, y + benchHeight - legOffset, legWidth, legHeight);
+  
   // Bench seat
   ctx.fillStyle = '#d2b48c';
   ctx.strokeStyle = '#a0522d';
   ctx.fillRect(x, y, benchWidth, benchHeight);
   ctx.strokeRect(x, y, benchWidth, benchHeight);
-
+  
   // Bench backrest (3 planks, slightly higher)
   for (let i = 0; i < 3; i++) {
-    const plankY = y - backrestHeight - backrestOffset + (i * plankHeight);
+    const plankY = y - backrestHeight - backrestOffset + i * plankHeight;
     ctx.fillStyle = '#d2b48c';
     ctx.strokeStyle = '#a0522d';
     ctx.fillRect(x, plankY, benchWidth, plankHeight);
     ctx.strokeRect(x, plankY, benchWidth, plankHeight);
   }
 }
+
 
 
 
