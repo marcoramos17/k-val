@@ -1,4 +1,4 @@
-const scoreThreshold = 10;
+const scoreThreshold = 1;
 let score = 0;
 let heartsInterval;
 
@@ -34,7 +34,7 @@ function startHearts() {
     // Add event listener for clicking the emoji
     emojiElement.addEventListener("click", () => {
       score++;
-      scoreDisplay.textContent = `Score: ${score}`;
+      scoreDisplay.textContent = `Good Girl Points: ${score}`;
       playClickSound();  // Play the sound when clicked
       emojiElement.remove();
       
