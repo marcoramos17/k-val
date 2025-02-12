@@ -12,7 +12,7 @@ const benchHeight = baseSize * 0.02 * benchScale; // Adjust the scale as needed
 const legHeight = baseSize * 0.18 * benchScale;
 const legWidth = baseSize * 0.01 * benchScale;
 const benchX = width / 2;
-const benchY = height * 0.71 - legHeight / 2;
+const benchY = height * 0.75 - legHeight / 2;
 
 let idealPositions = {};
 
@@ -29,8 +29,8 @@ calculateProportionalHeight('img/kcat.png', catWidth, function(height) {
 
         // Ideal positions for the puzzle pieces
         idealPositions = {
-            kcat: { x: benchX - benchWidth / 2, y: benchY - kcatHeight}, // Adjusted relative to the bench
-            mcat: { x: benchX - benchWidth / 2, y: benchY - mcatHeight}, // Adjusted relative to the bench
+            kcat: { x: (width/2) - (catWidth/2) - (catWidth*.45), y: benchY - kcatHeight}, // Adjusted relative to the bench
+            mcat: { x: (width/2) - (catWidth/2) + (catWidth*.45), y: benchY - mcatHeight}, // Adjusted relative to the bench
         };
 
         console.log('Ideal Positions:', idealPositions);

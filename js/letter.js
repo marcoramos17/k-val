@@ -815,8 +815,8 @@ function getRandomSentence() {
 function createThreeSceneryCanvas() {
   // Create a canvas that sits behind the 3D canvas
   const sceneryCanvas = document.createElement('canvas');
-  sceneryCanvas.width = window.innerWidth;
-  sceneryCanvas.height = window.innerHeight;
+  sceneryCanvas.width = width;
+  sceneryCanvas.height = height;
   sceneryCanvas.style.position = 'fixed';
   sceneryCanvas.style.top = '0';
   sceneryCanvas.style.left = '0';
@@ -829,27 +829,17 @@ function createThreeSceneryCanvas() {
   // Use the shared function to draw the scenery
   drawSharedScenery(ctx, sceneryCanvas.width, sceneryCanvas.height);
 
-
-  // Calculate the scaled width for cat images using the same logic
-  const baseSize = Math.min(window.innerWidth, window.innerHeight);
-  const benchWidth = baseSize * 0.2 * 0.5; // same as in createPuzzlePiece
-  const catImageWidth = benchWidth * 0.4;  // 40% of the bench width
-
   // Load and draw cat images
   const kcat = new Image();
   kcat.src = './img/kcat.png';
   kcat.onload = () => {
-    const aspectRatio = kcat.width / kcat.height;
-    const height = catImageWidth / aspectRatio;
-    ctx.drawImage(kcat, idealPositions.kcat.x, idealPositions.kcat.y, catImageWidth, height);
+    ctx.drawImage(kcat, idealPositions.kcat.x, idealPositions.kcat.y, catWidth, kcatHeight);
   };
 
   const mcat = new Image();
   mcat.src = './img/mcat.png';
   mcat.onload = () => {
-    const aspectRatio = mcat.width / mcat.height;
-    const height = catImageWidth / aspectRatio;
-    ctx.drawImage(mcat, idealPositions.mcat.x, idealPositions.mcat.y, catImageWidth, height);
+    ctx.drawImage(mcat, idealPositions.mcat.x, idealPositions.mcat.y, catWidth, mcatHeight);
   };
 
 }
