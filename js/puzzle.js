@@ -166,8 +166,15 @@ function createPuzzlePiece(src, id) {
   img.dataset.placed = 'false';
   img.setAttribute('draggable', 'false'); // Disable default dragging
 
+  // Redefine bench width and scale
+  const baseSize = Math.min(window.innerWidth, window.innerHeight);
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const benchScale = Math.max(Math.log((width * height) / 200000 + 1) * 0.5, 0.3);
+  const benchWidth = baseSize * 0.2 * benchScale; // Adjust the scale as needed
+
   // Set the desired width and height
-  img.style.width = '80px'; // Adjust to your desired size
+  img.style.width = benchWidth * 0.4 + 'px'; // Adjust to your desired percentage of the bench width
   img.style.height = 'auto'; // Maintain aspect ratio
   return img;
 }
@@ -274,17 +281,17 @@ function makeDraggable(element) {
   });
 }
 
-const imageDimensions = {
-  width: 80,
-  height: 'auto' // Maintain aspect ratio
-};
 
-const benchX = window.innerWidth / 2 - 100;
-const benchY = window.innerHeight - 290;
+const baseSize = Math.min(window.innerWidth, window.innerHeight);
+const benchWidth = baseSize * 0.2 * 0.5; // Adjust the scale as needed
+const benchHeight = baseSize * 0.02 * 0.5; // Adjust the scale as needed
+
+const benchX = window.innerWidth / 2;
+const benchY = window.innerHeight * 0.71 - benchHeight / 2;
 
 const idealPositions = {
-  kcat: { x: benchX + 30, y: benchY - 113 }, // Adjusted relative to the bench
-  mcat: { x: benchX + 103, y: benchY - 100 }, // Adjusted relative to the bench
+  kcat: { x: benchX - benchWidth / 2, y: benchY - (benchHeight * 19)}, // Adjusted relative to the bench
+  mcat: { x: benchX - benchWidth / 2, y: benchY - (benchHeight * 17.5)}, // Adjusted relative to the bench
 };
 
 function checkPlacement(piece) {
