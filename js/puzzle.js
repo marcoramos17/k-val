@@ -12,7 +12,7 @@ const benchHeight = baseSize * 0.02 * benchScale; // Adjust the scale as needed
 const legHeight = baseSize * 0.18 * benchScale;
 const legWidth = baseSize * 0.01 * benchScale;
 const benchX = width / 2;
-const benchY = height * 0.75 - legHeight / 2;
+const benchY = height * 0.85 - legHeight / 2;
 
 let idealPositions = {};
 
@@ -71,26 +71,51 @@ function calculateProportionalHeight(imagePath, desiredWidth, callback) {
 
 // Draw the shared scenery
 function drawSharedScenery(ctx, width, height) {
-    // 1) Draw grass
+    // Draw grass
     ctx.fillStyle = '#6dbd45';  // Grass color
     ctx.strokeStyle = '#4c9c2e'; // Cartoonish contour color
     ctx.lineWidth = width * 0.005;
+    ctx.fillRect(0, benchY * .9, width, height);
+    ctx.strokeRect(0, benchY * .9, width, height);
+    
+    // Draw path with perspective
+    ctx.fillStyle = '#735024';  // Dirt color
+    ctx.strokeStyle = '#63441c'; // Cartoonish contour color
+    ctx.lineWidth = width * 0.005;
+    const pathTopWidth = width * 0.3;
+    const pathBottomWidth = width * 0.5;
+    const pathHeight = height * 0.5;
+    const pathTopY = benchY * 0.9;
+    const pathBottomY = pathTopY + pathHeight;
+
     ctx.beginPath();
-    ctx.moveTo(0, height * 0.7);
-    ctx.lineTo(width, height * 0.7);
-    ctx.lineTo(width, height);
-    ctx.lineTo(0, height);
+    ctx.moveTo((width - pathTopWidth) / 2, pathTopY);
+    ctx.lineTo((width + pathTopWidth) / 2, pathTopY);
+    ctx.lineTo((width + pathBottomWidth) / 2, pathBottomY);
+    ctx.lineTo((width - pathBottomWidth) / 2, pathBottomY);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-  
-    // 2) Draw trees
-    drawTree(ctx, width * 0.2, height * 0.75, calculateScale(.8, .5)); // Left tree
-    drawTree(ctx, width * 0.8, height * 0.75, calculateScale(.8, .5)); // Right tree
-  
-    // 3) Draw bench
     
+    // Left trees
+    drawTree(ctx, width * 0.14, height * 0.69, calculateScale(.9, .6));
+    drawTree(ctx, width * 0.24, height * 0.65, calculateScale(.9, .6));
+    drawTree(ctx, width * 0.2, height * 0.75, calculateScale(.9, .6));
+    drawTree(ctx, width * 0.06, height * 1.05, calculateScale(.9, .6));
+    
+    
+
+    // Right trees
+    drawTree(ctx, width * 0.89, height * 0.70, calculateScale(.9, .6));
+    drawTree(ctx, width * 0.8, height * 0.75, calculateScale(.9, .6));
+    drawTree(ctx, width * 0.96, height * 0.95, calculateScale(.9, .6));
+    
+  
+    // Bench
     drawBench(ctx, benchX, benchY); // Centered bench
+
+    // More trees
+    //drawTree(ctx, width * 0.7, height * 0.97, calculateScale(.9, .6));
 }
 
 function drawBench(ctx, centerX, y) {

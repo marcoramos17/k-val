@@ -274,7 +274,8 @@ function createEnvelopeBackTexture() {
   context.fillRect(0, 0, canvas.width, canvas.height);
   
   // Draw "From: Marco" at the top left
-  context.font = "48px Arial";
+  context.font = "80px Tangerine, cursive";
+  context.weight = "700";
   context.fillStyle = "#000";
   context.textAlign = "left";
   context.fillText("From: Marco", 50, 70); // Coordinates: (50,70)
@@ -600,7 +601,8 @@ function showLetterContent() {
 
   // Draw the text with improved styling and margins
   context.fillStyle = '#000000'; // Black color for text
-  context.font = '40px Great Vibes, cursive'; // Larger font size for better visibility
+  context.font = "65px Tangerine, cursive";
+  context.weight = "700";
   context.textAlign = 'center';
   context.textBaseline = 'top';  // Align text to the top for better spacing
 
@@ -663,7 +665,7 @@ function triggerLoveLetter() {
 }
 
 function playNoSound() {
-  const noSound = new Audio("sounds/sad-trombone.mp3");
+  const noSound = new Audio("sounds/wait-no.mp3");
   noSound.play();
 }
 
@@ -813,7 +815,7 @@ function triggerExplosionAndSound() {
   document.body.appendChild(explosionContainer);
 
   // Play the explosion sound
-  const explosionSound = new Audio('sounds/claps.mp3');  // Replace with the actual path of your sound file
+  const explosionSound = new Audio('sounds/brainrot-cat.mp3');  // Replace with the actual path of your sound file
   explosionSound.play();
 
   // Remove explosion container after animation
