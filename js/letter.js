@@ -694,7 +694,7 @@ function showPopUp() {
   yesButton.classList.add('reply-btn');
   yesButton.addEventListener('click', () => {
     scoreDisplay.textContent = "YAYYY!! ❤️";  // Update the score display
-    //triggerExplosionAndSound();  // Trigger the explosion and sound
+    triggerExplosionAndSound();  // Trigger the explosion and sound
     //closePopUp();  // Close the pop-up
   });
 
@@ -782,6 +782,18 @@ function triggerExplosionAndSound() {
   // Emojis for the explosion effect
   const emojis = ['🍓', '👠', '❤️', '✨', '🐻'];
 
+ // Create explosion and sound effect when "Yes" is clicked
+function triggerExplosionAndSound() {
+  // Create a container for the explosion effect
+  const explosionContainer = document.createElement('div');
+  explosionContainer.classList.add('explosion-container');
+
+  // Number of emojis in the explosion
+  const numEmojis = 70;
+
+  // Emojis for the explosion effect
+  const emojis = ['🍓', '👠', '❤️', '✨', '🐻'];
+
   // Create emoji elements and append them to the container
   for (let i = 0; i < numEmojis; i++) {
     const emoji = document.createElement('span');
@@ -792,24 +804,16 @@ function triggerExplosionAndSound() {
     emoji.style.position = 'absolute';
     emoji.style.left = `${Math.random() * 100}%`;
     emoji.style.top = `${Math.random() * 100}%`;
-    emoji.style.fontSize = `${Math.random() * 30 + 20}px`; // Random size between 20px and 50px
-    emoji.style.opacity = '1';
-    emoji.style.transition = 'all 1s ease-out';
 
-    // Animate the explosion (random direction and distance)
-    setTimeout(() => {
-      const angle = Math.random() * 360;
-      const distance = Math.random() * 200 + 100; // Random distance between 100px and 300px
-      const xOffset = distance * Math.cos(angle);
-      const yOffset = distance * Math.sin(angle);
-
-      emoji.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
-      emoji.style.opacity = '0'; // Fade out
-    }, 100);
-
-    // Append emoji to the container
     explosionContainer.appendChild(emoji);
   }
+
+  // Append the explosion container to the body
+  document.body.appendChild(explosionContainer);
+
+  // Play sound effect (assuming you have a function to play sound)
+  playExplosionSound();
+}
 
   // Append the explosion container to the body
   document.body.appendChild(explosionContainer);
