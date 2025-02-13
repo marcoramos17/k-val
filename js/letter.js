@@ -273,16 +273,22 @@ function createEnvelopeBackTexture() {
   context.fillStyle = '#a3d9a5';
   context.fillRect(0, 0, canvas.width, canvas.height);
   
-  // Draw "From: Marco" at the top left
-  context.font = "80px Tangerine, cursive";
-  context.weight = "700";
-  context.fillStyle = "#000";
-  context.textAlign = "left";
-  context.fillText("From: Marco", 50, 70); // Coordinates: (50,70)
+  // Load the Google Font
+  WebFont.load({
+    google: {
+      families: ['Tangerine']
+    },
+    active: function() {
+      context.font = '80px Tangerine';
+      context.fillStyle = "#000";
+      context.textAlign = "left";
+      context.fillText("From: Marco", 50, 70); // Coordinates: (50,70)
   
-  // Draw "To: Kinza" at the bottom right
-  context.textAlign = "right";
-  context.fillText("To: Kinza", canvas.width - 50, canvas.height - 30); // Coordinates: (canvas.width-50, canvas.height-30)
+      // Draw "To: Kinza" at the bottom right
+      context.textAlign = "right";
+      context.fillText("To: Kinza", canvas.width - 50, canvas.height - 30); // Coordinates: (canvas.width-50, canvas.height-30)
+    }
+  });
   
   // --- Draw 3 Images ---
   // Create three image objects with placeholder sources (change these URLs as needed)
