@@ -792,15 +792,36 @@ function triggerExplosionAndSound() {
     emoji.style.position = 'absolute';
     emoji.style.left = `${Math.random() * 100}%`;
     emoji.style.top = `${Math.random() * 100}%`;
+    emoji.style.fontSize = `${Math.random() * 30 + 20}px`; // Random size between 20px and 50px
+    emoji.style.opacity = '1';
+    emoji.style.transition = 'all 1s ease-out';
 
+    // Animate the explosion (random direction and distance)
+    setTimeout(() => {
+      const angle = Math.random() * 360;
+      const distance = Math.random() * 200 + 100; // Random distance between 100px and 300px
+      const xOffset = distance * Math.cos(angle);
+      const yOffset = distance * Math.sin(angle);
+
+      emoji.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+      emoji.style.opacity = '0'; // Fade out
+    }, 100);
+
+    // Append emoji to the container
     explosionContainer.appendChild(emoji);
   }
 
   // Append the explosion container to the body
   document.body.appendChild(explosionContainer);
 
-  // Play sound effect (assuming you have a function to play sound)
-  playExplosionSound();
+  // Play the explosion sound
+  const explosionSound = new Audio('sounds/brainrot-cat.mp3');  // Replace with the actual path of your sound file
+  explosionSound.play();
+
+  // Remove explosion container after animation
+  setTimeout(() => {
+    explosionContainer.remove();
+  }, 2000);  // Remove after 1 second (when animation is complete)
 }
 
 // Expose the function globally so it can be called from other scripts
@@ -820,7 +841,7 @@ function createThreeSceneryCanvas() {
   sceneryCanvas.style.position = 'fixed';
   sceneryCanvas.style.top = '0';
   sceneryCanvas.style.left = '0';
-  sceneryCanvas.style.zIndex = '1'; // Ensure it's behind the 3D canvas
+  sceneryCanvas.style.zIndex = '9999'; // Ensure it's behind the 3D canvas
 
   document.body.appendChild(sceneryCanvas);
 
