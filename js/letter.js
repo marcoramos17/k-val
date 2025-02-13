@@ -8,9 +8,9 @@ let isEnvelopeOpened = false;
 const letterMessage = `
   Dear Kinza,
 
-  Words could hardly express everything you mean to me. It has been quite the ride, we've had our ups and dows. But I hope you know, these were the best 6 months of my life.
-  With all the good and the bad, I wouldn't have it any other way. Because it was through the good that I learned to love you and through the bad that I learned to cherish you.
-  Sometimes it's scary, I really don't want to lose you, you are and have become my everything. Before I even noticed you became my best friend, my beloved girlfriend (and future wife), my princess, my love, my sweetheart.
+  Words could hardly express everything you mean to me. It has been quite the ride, we've had our ups and downs. But I hope you know, these were the best 6 months of my life.
+  Honestly, I wouldn't have it any other way, because it was through the good that I learned to love you and through the bad that I learned to cherish you.
+  It absolutely blows me away every time, how can a feeling be this intense. Before I even noticed, you became my best friend, my beloved girlfriend (and future wife), my entire world and the sky above it.
   Truth be told, I fear living in a world without you. I fear not being able to achieve everything we set out to do, our goals, our dream, our plans and our future together.
   But it won't stop me, nothing will. I will fight for you, I will fight for us, I will fight for our love. I will fight for our future. From the very start, until the very end, I won't give up on you, I won't let you suffer alone, and I won't ever abandon you.
   This much I can promise, and this much I will do. I love you, Kinza, with all my heart and soul. I love you more than anything in this world, and I will love you for all eternity.
