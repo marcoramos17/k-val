@@ -782,18 +782,6 @@ function triggerExplosionAndSound() {
   // Emojis for the explosion effect
   const emojis = ['🍓', '👠', '❤️', '✨', '🐻'];
 
- // Create explosion and sound effect when "Yes" is clicked
-function triggerExplosionAndSound() {
-  // Create a container for the explosion effect
-  const explosionContainer = document.createElement('div');
-  explosionContainer.classList.add('explosion-container');
-
-  // Number of emojis in the explosion
-  const numEmojis = 70;
-
-  // Emojis for the explosion effect
-  const emojis = ['🍓', '👠', '❤️', '✨', '🐻'];
-
   // Create emoji elements and append them to the container
   for (let i = 0; i < numEmojis; i++) {
     const emoji = document.createElement('span');
@@ -813,19 +801,6 @@ function triggerExplosionAndSound() {
 
   // Play sound effect (assuming you have a function to play sound)
   playExplosionSound();
-}
-
-  // Append the explosion container to the body
-  document.body.appendChild(explosionContainer);
-
-  // Play the explosion sound
-  const explosionSound = new Audio('sounds/brainrot-cat.mp3');  // Replace with the actual path of your sound file
-  explosionSound.play();
-
-  // Remove explosion container after animation
-  setTimeout(() => {
-    explosionContainer.remove();
-  }, 2000);  // Remove after 1 second (when animation is complete)
 }
 
 // Expose the function globally so it can be called from other scripts
