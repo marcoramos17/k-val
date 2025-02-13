@@ -351,3 +351,4 @@ function startPuzzle() {
     // Keep the background scenery (grass, trees, bench) visible even after the puzzle is complete
     createPuzzleSceneryCanvas();
   }
+

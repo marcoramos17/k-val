@@ -656,7 +656,10 @@ function showPopUp() {
   // Create the container for the love letter pop-up
   const loveLetterContainer = document.createElement('div');
   loveLetterContainer.id = 'loveLetterContainer';
-  
+  loveLetterContainer.style.width = '80%'; // Set width to 80% of the screen width
+  loveLetterContainer.style.maxWidth = '800px'; // Set a maximum width
+  loveLetterContainer.style.margin = '0 auto'; // Center the container horizontally
+
   // Create the letter content (message and buttons)
   const letterContent = document.createElement('div');
   letterContent.classList.add('letter-content');
@@ -699,7 +702,6 @@ function showPopUp() {
     loveLetterContainer.style.display = 'none';
     document.body.removeChild(loveLetterContainer);  // Remove the pop-up from the DOM
   }
-  
 }
 
 
