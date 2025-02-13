@@ -694,7 +694,7 @@ function showPopUp() {
   yesButton.classList.add('reply-btn');
   yesButton.addEventListener('click', () => {
     scoreDisplay.textContent = "YAYYY!! ❤️";  // Update the score display
-    triggerExplosionAndSound();  // Trigger the explosion and sound
+    //triggerExplosionAndSound();  // Trigger the explosion and sound
     //closePopUp();  // Close the pop-up
   });
 
@@ -777,7 +777,7 @@ function triggerExplosionAndSound() {
   explosionContainer.classList.add('explosion-container');
 
   // Number of emojis in the explosion
-  const numEmojis = 20;
+  const numEmojis = 70;
 
   // Emojis for the explosion effect
   const emojis = ['🍓', '👠', '❤️', '✨', '🐻'];
