@@ -157,7 +157,7 @@
     height: 80%; /* Adjust height to fit content */
     margin: 20px auto; /* Add some margin */
     transform: translate(-50%, -50%);
-    overflow-y: auto; /* Make the CONTAINER scrollable */
+    overflow-y: scroll; /* Make the CONTAINER scrollable */
   }
 
   .letter-content {
