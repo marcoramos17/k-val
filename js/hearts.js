@@ -1,4 +1,4 @@
-const scoreThreshold = 1;
+const scoreThreshold = 18;
 let score = 0;
 let heartsInterval;
 
