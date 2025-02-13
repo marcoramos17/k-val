@@ -193,6 +193,23 @@ function createEnvelope() {
   );
   seal.add(sealOutline);
 
+  // Add the strawberry image to the seal
+  const loader = new THREE.TextureLoader();
+  loader.load('img/strawberry.webp', (texture) => {
+    const sealImageMaterial = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+    });
+
+    const sealImageGeometry = new THREE.CircleGeometry(0.08, 32); // Slightly smaller than the seal
+    const sealImage = new THREE.Mesh(sealImageGeometry, sealImageMaterial);
+    sealImage.position.set(0, 0.02, 0.011); // Slightly above the seal face
+    sealImage.rotation.x = Math.PI + (Math.PI/2); // Rotate to face away from the envelope
+    sealImage.rotation.y = Math.PI /2  - (Math.PI*.5); // Rotate to face away from the envelope
+    sealImage.rotation.z = Math.PI *2; // Rotate to face away from the envelope
+    seal.add(sealImage);
+  });
+
   // Add seal to the group
   envelopeGroup.add(seal);
 
