@@ -148,25 +148,3 @@
   background-color: #e6325c;
 }
 
-
-/* Styles for mobile devices */
-@media (max-width: 768px) {
-  #loveLetterContainer {
-    width: 90%;
-    max-width: 100%;
-    height: auto; /* Adjust height to fit content */
-    margin: 20px auto; /* Add some margin */
-    transform: translate(-50%, -50%);
-    overflow-y: scroll; /* Make the CONTAINER scrollable */
-  }
-
-  .letter-content {
-    padding: 10px;
-    font-size: 1.5rem; /* Adjust font size for mobile */
-  }
-
-  .letter-content button {
-    font-size: 1rem; /* Adjust button font size for mobile */
-    padding: 8px 16px;
-  }
-}
